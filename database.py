@@ -19,6 +19,26 @@ class Database:
         while retry_count < self.max_retries:
             try:
                 if self.connection is None or self.connection.closed:
+                    # Try internal connection first, fallback to external
+                    try:
+                        self.connection = psycopg2.connect(
+                            host='postgres.railway.internal',
+                            port=5432,
+                            database='railway',
+                            user='postgres',
+                            password='uPnzIOoMWKueCNawwlhioIekzfSgtack',
+                            cursor_factory=RealDictCursor
+                        )
+                    except psycopg2.Error:
+                        # Fallback to external connection
+                        self.connection = psycopg2.connect(
+                            host='metro.proxy.rlwy.net',
+                            port=33517,
+                            database='railway',
+                            user='postgres',
+                            password='uPnzIOoMWKueCNawwlhioIekzfSgtack',
+                            cursor_factory=RealDictCursor
+                        )
                     self.connection = psycopg2.connect(
                         host=os.getenv('DB_HOST', 'localhost'),
                         user=os.getenv('DB_USER', 'postgres'),
