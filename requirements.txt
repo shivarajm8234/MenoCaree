@@ -1,11 +1,13 @@
-absl-py==2.1.0
-acres==0.2.0
-aiobotocore @ file:///croot/aiobotocore_1714464387507/work
-aiofiles==24.1.0
-aiohappyeyeballs @ file:///croot/aiohappyeyeballs_1725434011349/work
-aiohttp @ file:///croot/aiohttp_1725527756643/work
-aioitertools @ file:///tmp/build/80754af9/aioitertools_1607109665762/work
-aiosignal @ file:///tmp/build/80754af9/aiosignal_1637843061372/work
+Flask==3.0.0
+Flask-Login==0.6.3
+Flask-SQLAlchemy==3.1.1
+gunicorn==21.2.0
+psycopg2-binary==2.9.9
+python-dotenv==1.0.0
+Werkzeug==3.0.1
+groq==0.4.2
+plotly==5.18.0
+requests==2.31.0
 alabaster @ file:///croot/alabaster_1718201490751/work
 alembic==1.14.1
 altair @ file:///work/perseverance-python-buildout/croot/altair_1698866618831/work
