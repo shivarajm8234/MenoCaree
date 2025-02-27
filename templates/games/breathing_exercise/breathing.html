@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+
+{% block title %}Breathing Exercise{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-b from-blue-50 to-cyan-50 py-12">
+    <div class="container mx-auto px-4">
+        <div class="max-w-5xl mx-auto">
+            <!-- Main Card -->
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden backdrop-blur-lg border border-blue-100">
+                <!-- Header Section -->
+                <div class="bg-gradient-to-r from-blue-600 to-cyan-700 p-10 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-pattern opacity-10"></div>
+                    <div class="relative z-10">
+                        <h1 class="text-4xl font-bold text-white text-center mb-3">Breathing Exercise</h1>
+                        <p class="text-blue-100 text-center text-lg">Find your calm through guided breathing</p>
+                    </div>
+                </div>
+
+                <!-- Exercise Content -->
+                <div class="p-8">
+                    <!-- Navigation -->
+                    <div class="flex items-center justify-between mb-8">
+                        <a href="{{ url_for('games.games_dashboard') }}" class="flex items-center text-blue-600 hover:text-blue-800 transition-colors">
+                            <i class="fas fa-chevron-left mr-2"></i>
+                            <span>Back to Games</span>
+                        </a>
+                        <div class="flex space-x-4">
+                            <a href="{{ url_for('games.quiz_game') }}" class="px-4 py-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors">Health Quiz</a>
+                            <a href="{{ url_for('games.mood_matcher_game') }}" class="px-4 py-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors">Mood Matcher</a>
+                            <a href="{{ url_for('games.memory_game') }}" class="px-4 py-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors">Memory Match</a>
+                        </div>
+                    </div>
+
+                    <!-- Breathing Circle -->
+                    <div class="flex flex-col items-center">
+                        <div class="breathing-circle" id="breathingCircle">
+                            <span id="breathingText" class="text-2xl font-semibold text-white">Click Start to begin</span>
+                        </div>
+
+                        <!-- Exercise Status -->
+                        <div class="text-center mb-8">
+                            <div id="message" class="text-xl text-blue-700 mb-2">Press Start to begin</div>
+                            <div id="timer" class="text-3xl font-bold text-blue-800">5:00</div>
+                        </div>
+
+                        <!-- Controls -->
+                        <div class="flex gap-4 mb-8">
+                            <button id="startBtn" onclick="startBreathing()" 
+                                    class="px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg hover:from-blue-700 hover:to-cyan-700 transition-colors shadow-md inline-flex">
+                                Start
+                            </button>
+                            <button id="stopBtn" onclick="stopBreathing()" 
+                                    class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors hidden">
+                                Reset
+                            </button>
+                        </div>
+
+                        <!-- Stats -->
+                        <div class="bg-blue-50 rounded-xl p-6 w-full max-w-md">
+                            <h3 class="text-xl font-semibold text-blue-700 mb-4">Session Stats</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <p class="text-blue-600 mb-1">Completed Cycles</p>
+                                    <p class="text-2xl font-bold text-blue-700" id="cycles">0</p>
+                                </div>
+                                <div>
+                                    <p class="text-blue-600 mb-1">Total Time</p>
+                                    <p class="text-2xl font-bold text-blue-700" id="totalTime">0:00</p>
+                                </div>
+                            </div>
+                            <div class="progress-ring mt-4">
+                                <div class="progress-ring-circle-bg" style="stroke-dasharray: 628; stroke-dashoffset: 628;"></div>
+                                <div class="progress-ring-circle" id="progress" style="stroke-dasharray: 628; stroke-dashoffset: 628;"></div>
+                            </div>
+                            <p class="text-blue-600 text-center mt-2" id="progressText">0%</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.bg-pattern {
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+.breathing-circle {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0891b2 0%, #0284c7 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    transition: transform 4s ease-in-out;
+    box-shadow: 0 0 20px rgba(8, 145, 178, 0.2);
+}
+
+.breathing-circle.breathing {
+    animation: breathe 8s infinite ease-in-out;
+}
+
+@keyframes breathe {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 20px rgba(8, 145, 178, 0.2);
+    }
+    50% {
+        transform: scale(1.4);
+        box-shadow: 0 0 40px rgba(8, 145, 178, 0.4);
+    }
+}
+
+.progress-ring {
+    transform: rotate(-90deg);
+}
+
+.progress-ring-circle {
+    stroke: #0891b2;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.35s;
+    transform-origin: 50% 50%;
+}
+
+.progress-ring-circle-bg {
+    stroke: #e2e8f0;
+}
+</style>
+
+<script>
+const breathingState = {
+    isActive: false,
+    currentPhase: 'inhale',
+    cycles: 0,
+    totalTime: 0,
+    timer: null,
+    startTime: null,
+    cycleTime: 8000, // 8 seconds per cycle (4s inhale, 4s exhale)
+    targetCycles: 5
+};
+
+function startBreathing() {
+    if (breathingState.isActive) return;
+    
+    breathingState.isActive = true;
+    breathingState.startTime = Date.now();
+    breathingState.cycles = 0;
+    breathingState.totalTime = 0;
+    
+    document.getElementById('startBtn').style.display = 'none';
+    document.getElementById('stopBtn').style.display = 'inline-flex';
+    
+    const circle = document.getElementById('breathingCircle');
+    circle.classList.add('breathing');
+    
+    updateBreathingText('Inhale...');
+    breathingState.currentPhase = 'inhale';
+    
+    breathingState.timer = setInterval(updateBreathing, 4000); // Switch every 4 seconds
+    updateStats();
+    showToast('Starting breathing exercise...', 'info');
+}
+
+function stopBreathing() {
+    if (!breathingState.isActive) return;
+    
+    breathingState.isActive = false;
+    clearInterval(breathingState.timer);
+    
+    const circle = document.getElementById('breathingCircle');
+    circle.classList.remove('breathing');
+    circle.style.transform = 'scale(1)';
+    
+    document.getElementById('startBtn').style.display = 'inline-flex';
+    document.getElementById('stopBtn').style.display = 'none';
+    
+    updateBreathingText('Click Start to begin');
+    showCompletionScreen();
+}
+
+function updateBreathing() {
+    if (!breathingState.isActive) return;
+    
+    if (breathingState.currentPhase === 'inhale') {
+        breathingState.currentPhase = 'exhale';
+        updateBreathingText('Exhale...');
+    } else {
+        breathingState.currentPhase = 'inhale';
+        updateBreathingText('Inhale...');
+        breathingState.cycles++;
+        updateStats();
+        
+        if (breathingState.cycles >= breathingState.targetCycles) {
+            stopBreathing();
+            return;
+        }
+    }
+}
+
+function updateBreathingText(text) {
+    document.getElementById('breathingText').textContent = text;
+}
+
+function updateStats() {
+    const timeElapsed = Math.floor((Date.now() - breathingState.startTime) / 1000);
+    document.getElementById('cycles').textContent = breathingState.cycles;
+    document.getElementById('totalTime').textContent = formatTime(timeElapsed);
+    
+    // Update progress
+    const progress = (breathingState.cycles / breathingState.targetCycles) * 100;
+    document.getElementById('progress').style.width = `${progress}%`;
+    document.getElementById('progressText').textContent = `${Math.round(progress)}%`;
+}
+
+function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+}
+
+function showCompletionScreen() {
+    const timeElapsed = Math.floor((Date.now() - breathingState.startTime) / 1000);
+    const completionScreen = document.createElement('div');
+    completionScreen.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+    completionScreen.innerHTML = `
+        <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4 text-center">
+            <h2 class="text-3xl font-bold text-cyan-600 mb-4">🌟 Great Job!</h2>
+            <div class="space-y-4 mb-6">
+                <p class="text-xl text-gray-700">You've completed your breathing exercise!</p>
+                <div class="bg-cyan-50 rounded-lg p-6">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-cyan-600">Cycles Completed</p>
+                            <p class="text-2xl font-bold text-cyan-700">${breathingState.cycles}</p>
+                        </div>
+                        <div>
+                            <p class="text-cyan-600">Total Time</p>
+                            <p class="text-2xl font-bold text-cyan-700">${formatTime(timeElapsed)}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-gray-600">
+                    ${getAchievementMessage(breathingState.cycles, timeElapsed)}
+                </div>
+            </div>
+            <div class="space-x-4">
+                <button onclick="closeCompletionScreen()" 
+                        class="px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg hover:from-cyan-700 hover:to-blue-700 transition-colors shadow-md">
+                    Done
+                </button>
+                <button onclick="handleRestart()" 
+                        class="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-600 hover:to-blue-600 transition-colors shadow-md">
+                    Start Again
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(completionScreen);
+}
+
+function getAchievementMessage(cycles, time) {
+    if (cycles >= breathingState.targetCycles) {
+        if (time < 60) {
+            return "🏆 Perfect focus! You maintained excellent breathing rhythm!";
+        } else {
+            return "🌟 Well done! You completed all cycles with good consistency!";
+        }
+    } else if (cycles >= Math.floor(breathingState.targetCycles * 0.7)) {
+        return "👏 Good effort! Keep practicing to improve your breathing technique!";
+    } else {
+        return "✨ Nice start! Regular practice will help you build better breathing habits!";
+    }
+}
+
+function closeCompletionScreen() {
+    const screen = document.querySelector('.fixed');
+    if (screen) {
+        screen.remove();
+    }
+}
+
+function handleRestart() {
+    closeCompletionScreen();
+    startBreathing();
+}
+
+function showToast(message, type) {
+    const toast = document.createElement('div');
+    toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg text-white transform transition-all duration-500 ${
+        type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500'
+    }`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 500);
+    }, 3000);
+}
+</script>
+{% endblock %}

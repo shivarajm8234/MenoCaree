@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}MenoCare - Home{% endblock %}
+
+{% block styles %}
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes rotate-scale {
+        0% {
+            transform: rotate(0deg) scale(1);
+        }
+        50% {
+            transform: rotate(180deg) scale(1.2);
+        }
+        100% {
+            transform: rotate(360deg) scale(1);
+        }
+    }
+
+    .animate-feature {
+        animation: fadeInUp 0.6s ease-out forwards;
+    }
+
+    .feature-card {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.3s ease-in-out;
+    }
+
+    .rotate-scale {
+        animation: rotate-scale 0.6s ease-in-out;
+    }
+
+    .hero-content {
+        animation: fadeInUp 1s ease-out;
+    }
+
+    .stat-card {
+        transition: all 0.3s ease-in-out;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section id="hero" class="bg-gradient-to-r from-primary to-accent text-white rounded-lg overflow-hidden relative mx-4 md:mx-8 my-6">
+    <div class="absolute inset-0 bg-pattern opacity-10"></div>
+    <div class="hero-content container mx-auto px-6 py-20 md:py-28 relative">
+        <h1 class="text-4xl md:text-6xl font-bold mb-6 animate-fade-in text-center">Welcome to MenoCare</h1>
+        <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto text-center leading-relaxed">Your AI-powered companion for a smoother menopause journey. Get personalized support, track symptoms, and connect with a caring community.</p>
+        <div class="flex flex-col sm:flex-row gap-6 justify-center items-center">
+            <a href="{{ url_for('register') if not logged_in else url_for('symptom_tracker') }}" 
+               class="btn-primary text-lg px-10 py-4 rounded-full transform hover:scale-105 transition-transform shadow-lg hover:shadow-xl">
+                {{ 'Get Started' if not logged_in else 'Track Symptoms' }}
+            </a>
+            <a href="{{ url_for('ai_chat') }}" 
+               class="btn-secondary text-lg px-10 py-4 rounded-full transform hover:scale-105 transition-transform shadow-lg hover:shadow-xl">
+                Chat with AI
+            </a>
+        </div>
+    </div>
+</section>
+
+<section id="stats" class="py-12 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            <div class="stat-card p-6 bg-white rounded-xl shadow-sm hover:shadow-lg">
+                <h3 class="text-3xl font-bold text-primary mb-2"><span class="stat-number" data-value="1000" data-suffix="K+">100</span></h3>
+                <p class="text-gray-600">Active Users</p>
+            </div>
+            <div class="stat-card p-6 bg-white rounded-xl shadow-sm hover:shadow-lg">
+                <h3 class="text-3xl font-bold text-primary mb-2"><span class="stat-number" data-value="24" data-suffix="/7">24/7</span></h3>
+                <p class="text-gray-600">AI Support</p>
+            </div>
+            <div class="stat-card p-6 bg-white rounded-xl shadow-sm hover:shadow-lg">
+                <h3 class="text-3xl font-bold text-primary mb-2"><span class="stat-number" data-value="95" data-suffix="%">Best Experience</span></h3>
+                <p class="text-gray-600">User Satisfaction</p>
+            </div>
+            <div class="stat-card p-6 bg-white rounded-xl shadow-sm hover:shadow-lg">
+                <h3 class="text-3xl font-bold text-primary mb-2"><span class="stat-number" data-value="50" data-suffix="+">5+</span></h3>
+                <p class="text-gray-600">Expert Articles</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="features" class="py-16">
+    <div class="container mx-auto px-4">
+        <h2 class="text-3xl font-bold text-center mb-4">Empowering Features</h2>
+        <p class="text-gray-600 text-center mb-12 max-w-2xl mx-auto">Discover tools designed to support every aspect of your menopause journey</p>
+        <div class="feature-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="feature-card bg-white p-8 rounded-xl shadow-lg transform hover:-translate-y-2 transition-transform animate-feature">
+                <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6 mx-auto">
+                    <img src="{{ url_for('static', filename='images/cycle-tracker.svg') }}" alt="Cycle Tracker" class="w-8 h-8">
+                </div>
+                <h3 class="text-xl font-semibold mb-4 text-center">Cycle Tracker</h3>
+                <p class="text-gray-600 mb-6 text-center">Monitor your menstrual cycles and get personalized predictions with AI-powered insights</p>
+                <a href="{{ url_for('cycle_tracker') }}" class="btn-outline block text-center py-3 rounded-lg hover:bg-primary hover:text-white transition-colors">Track Now</a>
+            </div>
+            <div class="feature-card bg-white p-8 rounded-xl shadow-lg transform hover:-translate-y-2 transition-transform animate-feature">
+                <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6 mx-auto">
+                    <img src="{{ url_for('static', filename='images/symptom-tracker.svg') }}" alt="Symptom Tracker" class="w-8 h-8">
+                </div>
+                <h3 class="text-xl font-semibold mb-4 text-center">Symptom Tracker</h3>
+                <p class="text-gray-600 mb-6 text-center">Track and analyze your symptoms with detailed insights and personalized recommendations</p>
+                <a href="{{ url_for('symptom_tracker') }}" class="btn-outline block text-center py-3 rounded-lg hover:bg-primary hover:text-white transition-colors">Get Started</a>
+            </div>
+            <div class="feature-card bg-white p-8 rounded-xl shadow-lg transform hover:-translate-y-2 transition-transform animate-feature">
+                <div class="w-16 h-16 bg-secondary/10 rounded-full flex items-center justify-center mb-6 mx-auto">
+                    <img src="{{ url_for('static', filename='images/ai-chat.svg') }}" alt="AI Chat Support" class="w-8 h-8">
+                </div>
+                <h3 class="text-xl font-semibold mb-4 text-center">AI Support</h3>
+                <p class="text-gray-600 mb-6 text-center">Get instant, personalized support and expert answers to your questions 24/7</p>
+                <a href="{{ url_for('ai_chat') }}" class="btn-outline block text-center py-3 rounded-lg hover:bg-primary hover:text-white transition-colors">Chat Now</a>
+            </div>
+            <div class="feature-card bg-white p-8 rounded-xl shadow-lg transform hover:-translate-y-2 transition-transform animate-feature">
+                <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6 mx-auto">
+                    <img src="{{ url_for('static', filename='images/community.svg') }}" alt="Community" class="w-8 h-8">
+                </div>
+                <h3 class="text-xl font-semibold mb-4 text-center">Community</h3>
+                <p class="text-gray-600 mb-6 text-center">Connect with others, share experiences, and find support in our caring community</p>
+                <a href="{{ url_for('community') }}" class="btn-outline block text-center py-3 rounded-lg hover:bg-primary hover:text-white transition-colors">Join Now</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="testimonials" class="py-16 bg-white">
+    <div class="container mx-auto px-4">
+        <h2 class="text-3xl font-bold text-center mb-4">What Our Users Say</h2>
+        <p class="text-gray-600 text-center mb-12 max-w-2xl mx-auto">Real stories from women who have found support and guidance through MenoCare</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="bg-gray-50 p-8 rounded-xl shadow-lg">
+                <div class="flex items-center mb-6">
+                    <div class="w-14 h-14 bg-primary/20 rounded-full flex items-center justify-center">
+                        <span class="text-primary text-xl font-bold">S</span>
+                    </div>
+                    <div class="ml-4">
+                        <h4 class="font-semibold text-lg">Sarah M.</h4>
+                        <p class="text-gray-500 text-sm">Member since 2023</p>
+                    </div>
+                </div>
+                <p class="text-gray-600 leading-relaxed">"MenoCare has been a game-changer for me. The AI support and symptom tracking have helped me understand and manage my symptoms better. I feel more in control of my journey."</p>
+            </div>
+            <div class="bg-gray-50 p-8 rounded-xl shadow-lg">
+                <div class="flex items-center mb-6">
+                    <div class="w-14 h-14 bg-secondary/20 rounded-full flex items-center justify-center">
+                        <span class="text-secondary text-xl font-bold">L</span>
+                    </div>
+                    <div class="ml-4">
+                        <h4 class="font-semibold text-lg">Lisa R.</h4>
+                        <p class="text-gray-500 text-sm">Member since 2024</p>
+                    </div>
+                </div>
+                <p class="text-gray-600 leading-relaxed">"The community support here is amazing. It's comforting to know I'm not alone on this journey. The resources and expert advice have made such a difference in my daily life."</p>
+            </div>
+            <div class="bg-gray-50 p-8 rounded-xl shadow-lg">
+                <div class="flex items-center mb-6">
+                    <div class="w-14 h-14 bg-accent/20 rounded-full flex items-center justify-center">
+                        <span class="text-accent text-xl font-bold">M</span>
+                    </div>
+                    <div class="ml-4">
+                        <h4 class="font-semibold text-lg">Maria K.</h4>
+                        <p class="text-gray-500 text-sm">Member since 2023</p>
+                    </div>
+                </div>
+                <p class="text-gray-600 leading-relaxed">"The AI chat feature is like having a knowledgeable friend available 24/7. The personalized recommendations have helped me make positive changes in my lifestyle."</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="cta" class="py-20 bg-gradient-to-r from-accent to-primary text-white text-center">
+    <div class="container mx-auto px-4">
+        <h2 class="text-3xl md:text-4xl font-bold mb-6">Ready to Take Control of Your Journey?</h2>
+        <p class="text-xl mb-8 max-w-2xl mx-auto">Join thousands of women who have found support, understanding, and empowerment through MenoCare.</p>
+        <a href="{{ url_for('register') if not logged_in else url_for('symptom_tracker') }}" 
+           class="inline-block bg-white text-primary px-12 py-4 rounded-full text-lg font-semibold hover:bg-opacity-90 transform hover:scale-105 transition-all shadow-lg">
+            {{ 'Join MenoCare Today' if not logged_in else 'Go to Dashboard' }}
+        </a>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/home.js') }}"></script>
+{% endblock %}

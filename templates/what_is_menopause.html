@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}What is Menopause?{% endblock %}
+
+{% block styles %}
+<style>
+    .content-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    h2 {
+        margin-top: 20px;
+        color: #2c3e50;
+    }
+    p {
+        line-height: 1.6;
+        color: #34495e;
+    }
+    .grid-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+    .grid-item {
+        background-color: #f7f7f7;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-container">
+    <h1 class="text-4xl font-bold">What is Menopause?</h1>
+    <p>Menopause is a natural biological process marking the end of menstrual cycles. It typically occurs in your 40s or 50s.</p>
+    <div class="grid-container">
+        <div class="grid-item">
+            <h3 class="font-semibold mb-2">Key Points:</h3>
+            <ul class="list-disc pl-6">
+                <li>Natural part of aging</li>
+                <li>Average age is 51 years</li>
+                <li>Diagnosed after 12 months without periods</li>
+                <li>Caused by hormonal changes</li>
+            </ul>
+        </div>
+        <div class="grid-item">
+            <h2>Introduction</h2>
+            <p>Menopause is a significant phase in a woman's life, marking the end of reproductive years. Understanding menopause can empower women to manage their health better during this transition.</p>
+        </div>
+    </div>
+    <h2>Definition</h2>
+    <p>Menopause is defined as the time that marks the end of your menstrual cycles. It is diagnosed after you have gone 12 months without a menstrual period.</p>
+    <h2>Causes</h2>
+    <p>Menopause occurs when the ovaries stop producing estrogen and progesterone, leading to the cessation of ovulation and menstruation.</p>
+    <h2>Impact</h2>
+    <p>Menopause can affect physical health, emotional well-being, and overall quality of life. Common effects include hot flashes, mood swings, and changes in sexual function.</p>
+    <h2>FAQs</h2>
+    <ul>
+        <li><strong>What age does menopause typically start?</strong> Most women experience menopause between the ages of 45 and 55.</li>
+        <li><strong>Can menopause be delayed?</strong> Certain lifestyle factors, such as smoking and body weight, can influence the timing of menopause.</li>
+    </ul>
+    <h2>Resources</h2>
+    <p>For more information, visit the <a href="https://www.mayoclinic.org/healthy-lifestyle/womens-health/in-depth/menopause/art-20046351">Mayo Clinic's menopause page</a>.</p>
+</div>
+{% endblock %}

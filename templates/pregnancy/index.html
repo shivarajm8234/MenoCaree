@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Pregnancy Tracker{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header Section -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-4">Your Pregnancy Journey</h1>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto">Track your pregnancy milestones, get personalized insights, and receive expert recommendations for a healthy journey.</p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <!-- Progress Steps -->
+            <div class="bg-gradient-to-r from-pink-500 to-purple-600 p-6">
+                <div class="flex justify-between max-w-2xl mx-auto">
+                    <div class="flex flex-col items-center">
+                        <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-pink-500">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <span class="text-white text-sm mt-2">Basic Info</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white">
+                            <i class="fas fa-baby"></i>
+                        </div>
+                        <span class="text-white text-sm mt-2">Development</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <span class="text-white text-sm mt-2">Analysis</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-8">
+                <form action="{{ url_for('pregnancy.track_pregnancy') }}" method="post" class="space-y-8">
+                    <!-- Basic Information Section -->
+                    <div class="bg-pink-50 rounded-xl p-6 border border-pink-100">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-6 flex items-center">
+                            <i class="fas fa-calendar-alt text-pink-500 mr-3"></i>
+                            Pregnancy Information
+                        </h2>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                <label for="weeks_pregnant" class="block text-sm font-medium text-gray-700">How Many Weeks Pregnant Are You?</label>
+                                <div class="relative">
+                                    <input type="number" id="weeks_pregnant" name="weeks_pregnant" required min="1" max="42"
+                                           class="mt-1 block w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <span class="text-gray-500">weeks</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-2">
+                                <label for="due_date" class="block text-sm font-medium text-gray-700">Your Due Date</label>
+                                <input type="date" id="due_date" name="due_date" required 
+                                       class="mt-1 block w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <div class="flex justify-center pt-6">
+                        <button type="submit" 
+                                class="px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg transform transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2">
+                            <i class="fas fa-baby mr-2"></i>
+                            Start Tracking Your Journey
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Information Cards -->
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
+            <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                <div class="text-pink-500 mb-4">
+                    <i class="fas fa-calendar-check text-3xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Weekly Updates</h3>
+                <p class="text-gray-600">Get detailed information about your baby's development each week.</p>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                <div class="text-purple-500 mb-4">
+                    <i class="fas fa-heartbeat text-3xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Health Monitoring</h3>
+                <p class="text-gray-600">Track important health metrics and get personalized recommendations.</p>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                <div class="text-blue-500 mb-4">
+                    <i class="fas fa-calendar-alt text-3xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Appointment Reminders</h3>
+                <p class="text-gray-600">Never miss important checkups with our smart reminder system.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

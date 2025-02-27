@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Common Symptoms{% endblock %}
+
+{% block styles %}
+<style>
+    .content-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    h2 {
+        margin-top: 20px;
+        color: #2c3e50;
+    }
+    p {
+        line-height: 1.6;
+        color: #34495e;
+    }
+    .grid-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+    .grid-item {
+        background-color: #f7f7f7;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-container">
+    <h1 class="text-4xl font-bold">Common Symptoms</h1>
+    <div class="grid-container">
+        <div class="grid-item">
+            <h3 class="font-semibold mb-2">Physical Symptoms</h3>
+            <ul class="list-disc pl-6">
+                <li>Hot flashes</li>
+                <li>Night sweats</li>
+                <li>Sleep problems</li>
+                <li>Weight gain</li>
+                <li>Vaginal dryness</li>
+            </ul>
+        </div>
+        <div class="grid-item">
+            <h3 class="font-semibold mb-2">Emotional Changes</h3>
+            <ul class="list-disc pl-6">
+                <li>Mood swings</li>
+                <li>Anxiety</li>
+                <li>Depression</li>
+                <li>Irritability</li>
+            </ul>
+        </div>
+    </div>
+    <p>Common symptoms of menopause can vary widely among women. Understanding these symptoms can help in managing them effectively.</p>
+    <h2>Detailed List</h2>
+    <p>Common symptoms include:</p>
+    <ul>
+        <li><strong>Hot Flashes:</strong> Sudden feelings of heat that can cause sweating and discomfort.</li>
+        <li><strong>Night Sweats:</strong> Hot flashes that occur during sleep, often disrupting rest.</li>
+        <li><strong>Sleep Problems:</strong> Difficulty falling or staying asleep.</li>
+        <li><strong>Weight Gain:</strong> Changes in metabolism can lead to weight gain.</li>
+        <li><strong>Vaginal Dryness:</strong> Decreased lubrication can cause discomfort during intercourse.</li>
+    </ul>
+    <h2>Management Strategies</h2>
+    <p>Consider lifestyle changes, hormone therapy, or natural remedies to alleviate symptoms.</p>
+    <h2>FAQs</h2>
+    <ul>
+        <li><strong>Are all women affected by menopause symptoms?</strong> While many women experience symptoms, the severity and type vary.</li>
+        <li><strong>When do symptoms typically start?</strong> Symptoms can begin in the perimenopause stage, often several years before menopause.</li>
+    </ul>
+    <h2>Resources</h2>
+    <p>For further reading, visit <a href="https://www.nhlbi.nih.gov/health-topics/menopause">NHLBI's menopause page</a>.</p>
+</div>
+{% endblock %}

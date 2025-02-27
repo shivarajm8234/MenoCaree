@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Stages of Menopause{% endblock %}
+
+{% block styles %}
+<style>
+    .content-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    h2 {
+        margin-top: 20px;
+        color: #2c3e50;
+    }
+    p {
+        line-height: 1.6;
+        color: #34495e;
+    }
+    .grid-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+    .stage-box {
+        background-color: #f7f7f7;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .stage-box h3 {
+        margin-top: 0;
+    }
+    .stage-box ul {
+        list-style: disc;
+        padding-left: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-container">
+    <h1 class="text-4xl font-bold">Stages of Menopause</h1>
+    <div class="grid-container">
+        <div class="stage-box">
+            <h3 class="font-semibold mb-2">1. Perimenopause</h3>
+            <ul>
+                <li>Begins several years before menopause</li>
+                <li>Irregular periods</li>
+                <li>First signs of hormonal changes</li>
+            </ul>
+        </div>
+        <div class="stage-box">
+            <h3 class="font-semibold mb-2">2. Menopause</h3>
+            <ul>
+                <li>12 consecutive months without a period</li>
+                <li>End of fertility</li>
+                <li>Significant hormonal changes</li>
+            </ul>
+        </div>
+        <div class="stage-box">
+            <h3 class="font-semibold mb-2">3. Postmenopause</h3>
+            <ul>
+                <li>Years following menopause</li>
+                <li>Symptoms may continue</li>
+                <li>Focus on health maintenance</li>
+            </ul>
+        </div>
+    </div>
+    <h2>Introduction</h2>
+    <p>Menopause is not a single event but a process that occurs in stages. Understanding these stages can help women navigate this transition more effectively.</p>
+    <h2>Detailed Description</h2>
+    <p>Menopause is divided into three stages: Perimenopause, Menopause, and Postmenopause. Each stage has its own set of symptoms and challenges.</p>
+    <h2>Transition Tips</h2>
+    <p>Managing symptoms during each stage can be challenging. It is important to consult with healthcare providers for personalized strategies.</p>
+    <h2>FAQs</h2>
+    <ul>
+        <li><strong>How long does perimenopause last?</strong> Perimenopause can last anywhere from a few months to several years.</li>
+        <li><strong>What are the signs of postmenopause?</strong> Symptoms may include vaginal dryness and hot flashes, but they often lessen over time.</li>
+    </ul>
+    <h2>Resources</h2>
+    <p>Learn more about the stages of menopause at <a href="https://www.womenshealth.gov/menopause/stages-menopause">WomensHealth.gov</a>.</p>
+</div>
+{% endblock %}

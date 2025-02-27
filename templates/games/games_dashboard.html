@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-b from-pink-50 to-purple-50 py-12">
+    <div class="container mx-auto px-4">
+        <div class="max-w-7xl mx-auto">
+            <!-- Main Card -->
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden backdrop-blur-lg border border-pink-100">
+                <!-- Header Section -->
+                <div class="bg-gradient-to-r from-pink-600 to-purple-700 p-10 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-pattern opacity-10"></div>
+                    <div class="relative z-10">
+                        <h1 class="text-4xl font-bold text-white text-center mb-3">Wellness Games</h1>
+                        <p class="text-pink-100 text-center text-lg">Engage, learn, and find balance through interactive experiences</p>
+                    </div>
+                </div>
+
+                <!-- Games Grid -->
+                <div class="p-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Mood Matcher -->
+                        <div class="transform hover:scale-105 transition-transform duration-300">
+                            <div class="bg-gradient-to-br from-rose-50 to-rose-100 rounded-2xl p-6 border border-rose-200 shadow-sm">
+                                <div class="flex items-center mb-4">
+                                    <div class="w-12 h-12 bg-rose-500 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-smile-beam text-white text-xl"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h3 class="text-lg font-bold text-rose-700">Mood Matcher</h3>
+                                        <p class="text-rose-600">Match emotions, find balance</p>
+                                    </div>
+                                </div>
+                                <p class="text-gray-600 mb-4">An engaging emotional wellness game to help you understand and manage your moods better.</p>
+                                <a href="{{ url_for('games.mood_matcher_game') }}" class="inline-block w-full bg-rose-600 text-white px-6 py-3 rounded-xl text-center hover:bg-rose-700 transition duration-300">Play Now</a>
+                            </div>
+                        </div>
+
+                        <!-- Quiz Game -->
+                        <div class="transform hover:scale-105 transition-transform duration-300">
+                            <div class="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-2xl p-6 border border-indigo-200 shadow-sm">
+                                <div class="flex items-center mb-4">
+                                    <div class="w-12 h-12 bg-indigo-500 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-question-circle text-white text-xl"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h3 class="text-lg font-bold text-indigo-700">Menstrual Health Quiz</h3>
+                                        <p class="text-indigo-600">Test your knowledge</p>
+                                    </div>
+                                </div>
+                                <p class="text-gray-600 mb-4">Interactive quizzes to enhance your understanding of menstrual health and wellness.</p>
+                                <a href="{{ url_for('games.quiz_game') }}" class="inline-block w-full bg-indigo-600 text-white px-6 py-3 rounded-xl text-center hover:bg-indigo-700 transition duration-300">Play Now</a>
+                            </div>
+                        </div>
+
+                        <!-- Memory Match -->
+                        <div class="transform hover:scale-105 transition-transform duration-300">
+                            <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-2xl p-6 border border-yellow-200 shadow-sm">
+                                <div class="flex items-center mb-4">
+                                    <div class="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-brain text-white text-xl"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h3 class="text-lg font-bold text-yellow-700">Memory Match</h3>
+                                        <p class="text-yellow-600">Train your brain</p>
+                                    </div>
+                                </div>
+                                <p class="text-gray-600 mb-4">Challenge your memory and cognitive skills with this engaging matching game.</p>
+                                <a href="{{ url_for('games.memory_game') }}" class="inline-block w-full bg-yellow-600 text-white px-6 py-3 rounded-xl text-center hover:bg-yellow-700 transition duration-300">Play Now</a>
+                            </div>
+                        </div>
+
+                        <!-- Breathing Exercise -->
+                        <div class="transform hover:scale-105 transition-transform duration-300">
+                            <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 border border-blue-200 shadow-sm">
+                                <div class="flex items-center mb-4">
+                                    <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-wind text-white text-xl"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h3 class="text-lg font-bold text-blue-700">Breathing Exercise</h3>
+                                        <p class="text-blue-600">Find your calm</p>
+                                    </div>
+                                </div>
+                                <p class="text-gray-600 mb-4">Guided breathing exercises to help you relax and reduce stress.</p>
+                                <a href="{{ url_for('games.breathing_game') }}" class="inline-block w-full bg-blue-600 text-white px-6 py-3 rounded-xl text-center hover:bg-blue-700 transition duration-300">Play Now</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feature Description -->
+                    <div class="mt-10 p-6 bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl border border-pink-100">
+                        <p class="text-gray-700 text-center">
+                            These mindfully curated activities are designed to support your emotional well-being and mental health. Each game provides a unique way to learn, relax, and grow.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-pattern {
+        background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+</style>
+{% endblock %}

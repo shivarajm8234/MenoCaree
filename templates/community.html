@@ -1,0 +1,560 @@
+
+{% extends "base.html" %}
+
+{% block title %}MenoCare - Community{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Doctor Consultation Section -->
+    <div class="mb-12">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-4">1:1 Doctor Consultation</h1>
+            <p class="text-gray-600 max-w-2xl mx-auto">Connect with experienced healthcare professionals who volunteer their time to support women through their menopausal journey. Our doctors are carefully selected and verified to ensure you receive the best care possible.</p>
+            <button id="startConsultationBtn" class="mt-6 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                Start Consultation
+            </button>
+        </div>
+
+        <!-- Location Selection Modal -->
+        <div id="locationModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-6 w-full max-w-md">
+                <h2 class="text-xl font-bold mb-4">Select Your Location</h2>
+                <select id="location" class="w-full border rounded-lg px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Select a region in Karnataka</option>
+                    <option value="bangalore">Bangalore</option>
+                    <option value="mysore">Mysore</option>
+                    <option value="hubli">Hubli</option>
+                    <option value="mangalore">Mangalore</option>
+                    <option value="belgaum">Belgaum</option>
+                    <option value="madikeri">Madikeri</option>
+                </select>
+                <div class="flex justify-end space-x-4">
+                    <button id="cancelLocationBtn" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-gray-500">
+                        Cancel
+                    </button>
+                    <button id="confirmLocationBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        Confirm
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Map Section -->
+        <div id="mapSection" class="hidden">
+            <div class="relative h-[600px] rounded-lg overflow-hidden">
+                <div id="map" class="w-full h-full"></div>
+                <div class="legend">
+                    <h4>Available Doctors</h4>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #3388ff;"></div>
+                        <span>Female Doctors</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ff4444;"></div>
+                        <span>Male Doctors</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Doctor Details Modal -->
+        <div id="doctorModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-6 w-full max-w-2xl">
+                <div class="flex justify-between items-start mb-4">
+                    <h2 class="text-2xl font-bold" id="doctorName"></h2>
+                    <button id="closeDoctorModal" class="text-gray-500 hover:text-gray-700">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <div class="w-full h-48 bg-gray-200 rounded-lg mb-4 flex items-center justify-center">
+                            <svg class="w-24 h-24 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                        </div>
+                        <div class="flex items-center mb-2">
+                            <span class="font-bold mr-2">Rating:</span>
+                            <div id="doctorRating" class="flex text-yellow-400"></div>
+                        </div>
+                        <p id="doctorGender" class="mb-2"></p>
+                        <p id="doctorSpecialty" class="mb-2"></p>
+                        <p id="doctorLanguages" class="mb-2"></p>
+                    </div>
+                    <div>
+                        <h3 class="font-bold mb-2">About</h3>
+                        <p id="doctorBio" class="text-gray-600 mb-4"></p>
+                        <div class="space-y-4">
+                            <button onclick="startChat()" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                Start 1:1 Chat
+                            </button>
+                            <button onclick="startVideoCall()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-green-500">
+                                Start Video Call
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Community Groups Section -->
+    <div class="mb-12">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">Community Groups</h1>
+            <button onclick="openCreateGroupModal()" 
+                    class="bg-primary hover:bg-primary-dark text-white font-bold py-3 px-6 rounded-lg transition duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:ring-opacity-50 shadow-lg">
+                <span class="flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                    </svg>
+                    Create New Group
+                </span>
+            </button>
+        </div>
+
+        <!-- Create Group Modal -->
+        <div id="createGroupModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md transform transition-all duration-300">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold text-gray-900">Create New Group</h3>
+                    <button onclick="closeCreateGroupModal()" class="text-gray-500 hover:text-gray-700 transition duration-150">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <form id="createGroupForm" class="space-y-6">
+                    <div class="space-y-4">
+                        <div>
+                            <label for="groupName" class="block text-sm font-semibold text-gray-700 mb-2">Group Name</label>
+                            <input type="text" id="groupName" name="name" required
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition duration-150"
+                                   placeholder="Enter your group name">
+                        </div>
+                        <div>
+                            <label for="groupDescription" class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
+                            <textarea id="groupDescription" name="description" required
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition duration-150"
+                                    rows="4" placeholder="What is your group about?"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end space-x-4 mt-8">
+                        <button type="button" onclick="closeCreateGroupModal()"
+                                class="px-6 py-3 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition duration-150">
+                            Cancel
+                        </button>
+                        <button type="submit"
+                                class="px-6 py-3 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition duration-150">
+                            Create Group
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Groups Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for group_id, group in forum_groups.items() %}
+                <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition duration-300">
+                    <h2 class="text-xl font-bold text-gray-800 mb-2">{{ group.name }}</h2>
+                    <p class="text-gray-600 mb-4">{{ group.description }}</p>
+                    {% if group.created_at %}
+                        <p class="text-sm text-gray-500 mb-4">Created: {{ group.created_at }}</p>
+                    {% endif %}
+                    <div class="flex justify-between items-center">
+                        <a href="{{ url_for('view_group', group_id=group_id) }}"
+                           class="text-primary hover:text-primary-dark font-medium transition duration-150">
+                            View Group
+                        </a>
+                        {% if group_id in joined_groups %}
+                            <span class="text-green-500 font-medium">Joined</span>
+                        {% endif %}
+                    </div>
+                </div>
+            {% else %}
+                <div class="col-span-full text-center py-12">
+                    <p class="text-gray-600">No groups available. Create a new group to get started!</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Map and Doctor Consultation Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.6.0/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.6.0/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
+
+    <script>
+        let map;
+        const doctorData = {
+            bangalore: [
+                {
+                    id: 1,
+                    name: "Dr. Priya Sharma",
+                    gender: "Female",
+                    specialty: "Gynecologist & Menopause Specialist",
+                    languages: "English",
+                    rating: 4.8,
+                    bio: "Senior Consultant at Manipal Hospitals, Bangalore. Dr. Priya has 15 years of experience in women's health and specializes in menopause management.",
+                    location: [12.9716, 77.5946],
+                    hospital: "Manipal Hospitals, Old Airport Road",
+                    availability: "Mon-Sat: 10:00 AM - 4:00 PM"
+                },
+                {
+                    id: 2,
+                    name: "Dr. Rajesh Kumar",
+                    gender: "Male",
+                    specialty: "Endocrinologist",
+                    languages: "English",
+                    rating: 4.6,
+                    bio: "Consultant at Apollo Hospitals, Bangalore. Dr. Rajesh is an experienced endocrinologist with expertise in hormonal treatments.",
+                    location: [12.9591, 77.6466],
+                    hospital: "Apollo Hospitals, Bannerghatta Road",
+                    availability: "Mon-Fri: 9:00 AM - 5:00 PM"
+                },
+                {
+                    id: 3,
+                    name: "Dr. Meera Patel",
+                    gender: "Female",
+                    specialty: "Gynecologist & Fertility Specialist",
+                    languages: "English",
+                    rating: 4.9,
+                    bio: "Senior Consultant at Fortis Hospital, Bangalore. Specializes in women's health and menopausal care.",
+                    location: [12.9010, 77.5947],
+                    hospital: "Fortis Hospital, Bannerghatta Road",
+                    availability: "Mon-Sat: 11:00 AM - 6:00 PM"
+                }
+            ],
+            mysore: [
+                {
+                    id: 4,
+                    name: "Dr. Lakshmi Rao",
+                    gender: "Female",
+                    specialty: "Gynecologist",
+                    languages: "English",
+                    rating: 4.9,
+                    bio: "Chief Gynecologist at Apollo BGS Hospitals, Mysore. Over 20 years of experience in women's healthcare.",
+                    location: [12.2958, 76.6394],
+                    hospital: "Apollo BGS Hospitals, Mysore",
+                    availability: "Mon-Fri: 10:00 AM - 4:00 PM"
+                },
+                {
+                    id: 5,
+                    name: "Dr. Suresh Kumar",
+                    gender: "Male",
+                    specialty: "Endocrinologist & Diabetes Specialist",
+                    languages: "English",
+                    rating: 4.7,
+                    bio: "Consultant at JSS Hospital, Mysore. Specializes in hormonal disorders and diabetes management.",
+                    location: [12.3052, 76.6376],
+                    hospital: "JSS Hospital, Mysore",
+                    availability: "Mon-Sat: 9:30 AM - 3:30 PM"
+                }
+            ],
+            mangalore: [
+                {
+                    id: 6,
+                    name: "Dr. Reshma Shetty",
+                    gender: "Female",
+                    specialty: "Gynecologist & Women's Health Specialist",
+                    languages: "English",
+                    rating: 4.8,
+                    bio: "Senior Consultant at KMC Hospital, Mangalore. Expert in menopausal care and hormone therapy.",
+                    location: [12.8648, 74.8428],
+                    hospital: "KMC Hospital, Mangalore",
+                    availability: "Mon-Sat: 10:00 AM - 5:00 PM"
+                },
+                {
+                    id: 7,
+                    name: "Dr. Anand Kamath",
+                    gender: "Male",
+                    specialty: "Endocrinologist",
+                    languages: "English",
+                    rating: 4.6,
+                    bio: "Consultant at AJ Hospital, Mangalore. Specializes in hormonal disorders and metabolic conditions.",
+                    location: [12.8698, 74.8574],
+                    hospital: "AJ Hospital & Research Centre",
+                    availability: "Mon-Fri: 9:00 AM - 4:00 PM"
+                }
+            ],
+            hubli: [
+                {
+                    id: 8,
+                    name: "Dr. Savita Patil",
+                    gender: "Female",
+                    specialty: "Gynecologist",
+                    languages: "English",
+                    rating: 4.7,
+                    bio: "Senior Consultant at KIMS Hospital, Hubli. Experienced in women's health and menopausal care.",
+                    location: [15.3647, 75.1240],
+                    hospital: "KIMS Hospital, Hubli",
+                    availability: "Mon-Sat: 10:30 AM - 5:30 PM"
+                }
+            ],
+            belgaum: [
+                {
+                    id: 9,
+                    name: "Dr. Vijaya Kulkarni",
+                    gender: "Female",
+                    specialty: "Gynecologist & Obstetrician",
+                    languages: "English",
+                    rating: 4.8,
+                    bio: "Chief Gynecologist at KLE Hospital, Belgaum. Expert in women's healthcare and menopause management.",
+                    location: [15.8497, 74.4977],
+                    hospital: "KLE Hospital, Belgaum",
+                    availability: "Mon-Sat: 9:00 AM - 4:00 PM"
+                }
+            ],
+            madikeri: [
+                {
+                    id: 10,
+                    name: "Dr. Ramya Gowda",
+                    gender: "Female",
+                    specialty: "Gynecologist",
+                    languages: "English",
+                    rating: 4.7,
+                    bio: "Consultant at District Hospital, Madikeri. Specializes in women's health and menopausal care.",
+                    location: [12.4200, 75.7400],
+                    hospital: "District Hospital, Madikeri",
+                    availability: "Mon-Fri: 10:00 AM - 4:00 PM"
+                }
+            ]
+        };
+
+        function initMap() {
+            map = L.map("map", {
+                center: [12.9716, 77.5946],
+                zoom: 12
+            });
+
+            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+        }
+
+        function showDoctors(city) {
+            if (!map) return;
+            
+            const doctors = doctorData[city] || [];
+            doctors.forEach(doctor => {
+                const marker = L.marker(doctor.location, {
+                    icon: L.AwesomeMarkers.icon({
+                        icon: 'user-md',
+                        markerColor: doctor.gender.toLowerCase() === 'female' ? 'blue' : 'red',
+                        prefix: 'fa'
+                    })
+                });
+
+                marker.on('click', () => showDoctorDetails(doctor));
+                marker.addTo(map);
+            });
+
+            if (doctors.length > 0) {
+                map.setView(doctors[0].location, 12);
+            }
+        }
+
+        function showDoctorDetails(doctor) {
+            document.getElementById('doctorName').textContent = doctor.name;
+            document.getElementById('doctorGender').textContent = `Gender: ${doctor.gender}`;
+            document.getElementById('doctorSpecialty').textContent = `Specialty: ${doctor.specialty}`;
+            document.getElementById('doctorLanguages').textContent = `Languages: ${doctor.languages}`;
+            document.getElementById('doctorBio').textContent = doctor.bio;
+
+            const bioDiv = document.getElementById('doctorBio').parentElement;
+            const hospitalInfo = document.createElement('p');
+            hospitalInfo.className = 'text-gray-600 mb-2';
+            hospitalInfo.textContent = `Hospital: ${doctor.hospital}`;
+            const availabilityInfo = document.createElement('p');
+            availabilityInfo.className = 'text-gray-600 mb-4';
+            availabilityInfo.textContent = `Available: ${doctor.availability}`;
+            
+            bioDiv.insertBefore(hospitalInfo, document.getElementById('doctorBio').nextSibling);
+            bioDiv.insertBefore(availabilityInfo, hospitalInfo.nextSibling);
+
+            const ratingDiv = document.getElementById('doctorRating');
+            ratingDiv.innerHTML = '';
+            for (let i = 0; i < 5; i++) {
+                const star = document.createElement('span');
+                star.innerHTML = i < Math.floor(doctor.rating) ? '★' : '☆';
+                ratingDiv.appendChild(star);
+            }
+            ratingDiv.appendChild(document.createTextNode(` ${doctor.rating}`));
+
+            document.getElementById('doctorModal').classList.remove('hidden');
+        }
+
+        function startChat() {
+            window.location.href = '/doctor-chat';
+        }
+
+        function startVideoCall() {
+            window.location.href = '/doctor-video-call';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const startBtn = document.getElementById('startConsultationBtn');
+            const locationModal = document.getElementById('locationModal');
+            const mapSection = document.getElementById('mapSection');
+            const doctorModal = document.getElementById('doctorModal');
+
+            startBtn.addEventListener('click', () => {
+                locationModal.classList.remove('hidden');
+            });
+
+            document.getElementById('confirmLocationBtn').addEventListener('click', () => {
+                const location = document.getElementById('location').value;
+                if (location) {
+                    locationModal.classList.add('hidden');
+                    mapSection.classList.remove('hidden');
+                    if (!map) {
+                        initMap();
+                    }
+                    showDoctors(location);
+                }
+            });
+
+            document.getElementById('cancelLocationBtn').addEventListener('click', () => {
+                locationModal.classList.add('hidden');
+            });
+
+            document.getElementById('closeDoctorModal').addEventListener('click', () => {
+                doctorModal.classList.add('hidden');
+            });
+        });
+    </script>
+
+    <script>
+        function openCreateGroupModal() {
+            document.getElementById('createGroupModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+
+        function closeCreateGroupModal() {
+            document.getElementById('createGroupModal').classList.add('hidden');
+            document.body.style.overflow = 'auto'; // Restore scrolling
+            document.getElementById('createGroupForm').reset();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const createGroupForm = document.getElementById('createGroupForm');
+
+            createGroupForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const data = {
+                    name: formData.get('name'),
+                    description: formData.get('description')
+                };
+                
+                try {
+                    const response = await fetch('/community/create_group', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        // Show success message with better styling
+                        const successMessage = document.createElement('div');
+                        successMessage.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+                        successMessage.textContent = 'Group created successfully!';
+                        document.body.appendChild(successMessage);
+                        
+                        // Remove message after 3 seconds
+                        setTimeout(() => {
+                            successMessage.remove();
+                            // Close modal and refresh page
+                            closeCreateGroupModal();
+                            window.location.reload();
+                        }, 2000);
+                    } else {
+                        // Show error message with better styling
+                        const errorMessage = document.createElement('div');
+                        errorMessage.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+                        errorMessage.textContent = result.error || 'Failed to create group. Please try again.';
+                        document.body.appendChild(errorMessage);
+                        
+                        // Remove message after 3 seconds
+                        setTimeout(() => {
+                            errorMessage.remove();
+                        }, 3000);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    // Show error message
+                    const errorMessage = document.createElement('div');
+                    errorMessage.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+                    errorMessage.textContent = 'An error occurred. Please try again.';
+                    document.body.appendChild(errorMessage);
+                    
+                    // Remove message after 3 seconds
+                    setTimeout(() => {
+                        errorMessage.remove();
+                    }, 3000);
+                }
+            });
+
+            // Close modal when clicking outside
+            document.getElementById('createGroupModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeCreateGroupModal();
+                }
+            });
+
+            // Close modal with Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeCreateGroupModal();
+                }
+            });
+        });
+    </script>
+
+    <style>
+        .legend {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            border-radius: 50%;
+        }
+        #locationModal, #doctorModal {
+            z-index: 9999 !important;
+        }
+        .leaflet-popup-content-wrapper {
+            z-index: 1001;
+        }
+        #map {
+            z-index: 1;
+        }
+    </style>
+{% endblock %}

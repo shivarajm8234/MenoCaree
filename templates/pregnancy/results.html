@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}Pregnancy Tracker Results{% endblock %}
+
+{% block content %}
+<style>
+    .prose strong {
+        color: #ec4899;  /* Pink-500 */
+        font-weight: 600;
+    }
+    
+    .prose p {
+        margin-bottom: 1rem;
+        line-height: 1.7;
+    }
+    
+    .prose ul {
+        list-style-type: disc;
+        padding-left: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .prose li {
+        margin-bottom: 0.5rem;
+    }
+    
+    .prose h3 {
+        color: #be185d;  /* Pink-700 */
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .gradient-card {
+        background: linear-gradient(135deg, rgba(236,72,153,0.1) 0%, rgba(147,51,234,0.1) 100%);
+    }
+</style>
+
+<div class="max-w-7xl mx-auto px-4 py-12">
+    <!-- Hero Section -->
+    <div class="text-center mb-16 bg-gradient-to-r from-pink-500 to-purple-600 text-white py-16 rounded-2xl shadow-lg relative overflow-hidden">
+        <div class="absolute inset-0 bg-pattern opacity-10"></div>
+        <div class="relative z-10">
+            <h1 class="text-4xl md:text-5xl font-bold mb-6">Your Pregnancy Journey</h1>
+            <p class="text-xl md:text-2xl max-w-3xl mx-auto">Week {{ weeks_pregnant }} of Your Beautiful Journey</p>
+        </div>
+    </div>
+
+    <!-- Progress Timeline -->
+    <div class="mb-12 bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div class="bg-gradient-to-r from-pink-100 to-purple-100 px-6 py-4 border-b">
+            <div class="flex items-center">
+                <div class="w-10 h-10 bg-pink-200 rounded-full flex items-center justify-center">
+                    <i class="fas fa-calendar-alt text-pink-600"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 ml-4">Your Progress</h2>
+            </div>
+        </div>
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <p class="text-lg font-semibold text-gray-600">Current Stage</p>
+                    <p class="text-3xl font-bold text-pink-500">Week {{ weeks_pregnant }}</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-lg font-semibold text-gray-600">Due Date</p>
+                    <p class="text-2xl font-bold text-gray-800">{{ due_date }}</p>
+                </div>
+            </div>
+            <div class="relative">
+                <div class="w-full bg-gray-200 rounded-full h-4">
+                    <div class="bg-gradient-to-r from-pink-500 to-purple-600 h-4 rounded-full transition-all duration-500" 
+                         style="width: {{ (weeks_pregnant/40)*100 }}%"></div>
+                </div>
+                <div class="flex justify-between mt-2 text-sm text-gray-600">
+                    <span>First Trimester</span>
+                    <span>Second Trimester</span>
+                    <span>Third Trimester</span>
+                </div>
+            </div>
+            <p class="text-center mt-4 text-gray-600">{{ 40 - weeks_pregnant }} weeks until your due date</p>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Left Column -->
+        <div class="space-y-8">
+            <!-- Baby's Development -->
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div class="bg-gradient-to-r from-pink-100 to-purple-100 px-6 py-4 border-b">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-pink-200 rounded-full flex items-center justify-center">
+                            <i class="fas fa-baby text-pink-600"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-800 ml-4">Baby's Development</h2>
+                    </div>
+                </div>
+                <div class="p-6 prose max-w-none">
+                    {{ fetal_development | safe }}
+                </div>
+            </div>
+
+            <!-- Next Checkup -->
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div class="bg-gradient-to-r from-pink-100 to-purple-100 px-6 py-4 border-b">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-pink-200 rounded-full flex items-center justify-center">
+                            <i class="fas fa-calendar-check text-pink-600"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-800 ml-4">Upcoming Checkup</h2>
+                    </div>
+                </div>
+                <div class="p-6 prose max-w-none">
+                    {{ next_checkup | safe }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="space-y-8">
+            <!-- Nutrition Guide -->
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div class="bg-gradient-to-r from-pink-100 to-purple-100 px-6 py-4 border-b">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-pink-200 rounded-full flex items-center justify-center">
+                            <i class="fas fa-apple-alt text-pink-600"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-800 ml-4">Nutrition Guide</h2>
+                    </div>
+                </div>
+                <div class="p-6 prose max-w-none">
+                    {{ nutrition_plan | safe }}
+                </div>
+            </div>
+
+            <!-- Important Reminders -->
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div class="bg-gradient-to-r from-pink-100 to-purple-100 px-6 py-4 border-b">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-pink-200 rounded-full flex items-center justify-center">
+                            <i class="fas fa-bell text-pink-600"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-800 ml-4">Important Reminders</h2>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <ul class="space-y-4">
+                        {% for reminder in reminders %}
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-pink-500 mt-1 mr-3"></i>
+                            <span class="text-gray-700">{{ reminder }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}MenoCare - Logged Out{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <div>
+            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                You have been logged out
+            </h2>
+            <p class="mt-2 text-center text-sm text-gray-600">
+                Thank you for using MenoCare
+            </p>
+        </div>
+        <div class="mt-8 text-center">
+            <a href="{{ url_for('home') }}" class="text-primary hover:text-primary-dark">
+                Return to Home
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Clear session storage on logout
+    sessionStorage.clear();
+    
+    // Redirect to home page after a brief delay
+    setTimeout(() => {
+        window.location.href = "{{ url_for('home') }}";
+    }, 2000);
+</script>
+{% endblock %}

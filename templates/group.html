@@ -1,0 +1,302 @@
+{% extends "base.html" %}
+
+{% block title %}{{ group.name }} - MenoCare Community{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <a href="{{ url_for('community') }}" class="text-primary hover:text-primary-dark mb-4 inline-flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            Back to Groups
+        </a>
+        <div class="flex justify-between items-start">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ group.name }}</h1>
+                <p class="text-gray-600">{{ group.description }}</p>
+            </div>
+            <div class="flex space-x-4">
+                {% if not is_member %}
+                <button id="join-group" class="btn-primary">
+                    Join Group
+                </button>
+                {% else %}
+                <button id="createTopicBtn" 
+                        class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                    Create New Topic
+                </button>
+                {% endif %}
+                
+                {% if group.created_by == session.get('user_id') %}
+                <button id="deleteGroupBtn"
+                        class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                    Delete Group
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Topics List -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-semibold">{{ group.name }}</h2>
+                </div>
+                
+                <!-- Create Topic Modal -->
+                <div id="createTopicModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                    <div class="bg-white rounded-lg p-6 w-full max-w-md">
+                        <h2 class="text-xl font-bold mb-4">Create New Topic</h2>
+                        <form id="createTopicForm" class="space-y-4">
+                            <div>
+                                <label for="topic-title" class="block text-gray-700 text-sm font-bold mb-2">
+                                    Topic Title
+                                </label>
+                                <input type="text" id="topic-title" name="title" required
+                                       class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                       placeholder="Enter topic title">
+                            </div>
+                            <div>
+                                <label for="topic-description" class="block text-gray-700 text-sm font-bold mb-2">
+                                    Description
+                                </label>
+                                <textarea id="topic-description" name="description" required rows="3"
+                                          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                          placeholder="Describe your topic"></textarea>
+                            </div>
+                            <div class="flex justify-end space-x-4">
+                                <button type="button" id="cancelCreateTopicBtn"
+                                        class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                                    Cancel
+                                </button>
+                                <button type="submit"
+                                        class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                                    Create Topic
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <h2 class="text-2xl font-semibold mb-6">Discussion Topics</h2>
+                <div class="space-y-4">
+                    {% for topic_id, topic in group.topics.items() %}
+                    <div class="border rounded-lg p-4 hover:border-primary transition-colors">
+                        <div class="flex items-center justify-between mb-2">
+                            <a href="{{ url_for('view_topic', group_id=group_id, topic_id=topic_id) }}" 
+                               class="text-lg font-medium hover:text-primary">
+                                {{ topic.title }}
+                            </a>
+                            {% if topic.created_by == session.get('user_id') or group.created_by == session.get('user_id') %}
+                            <button onclick="deleteTopic('{{ topic_id }}')"
+                                    class="text-red-500 hover:text-red-600">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                            {% endif %}
+                        </div>
+                        <p class="text-gray-600 text-sm">{{ topic.description }}</p>
+                        <div class="mt-2 text-sm text-gray-500">
+                            Created by: {{ topic.created_by }}
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-8">
+                        <p class="text-gray-600">
+                            {% if is_member %}
+                            No topics yet. Create one to get started!
+                            {% else %}
+                            Join the group to create and participate in topics!
+                            {% endif %}
+                        </p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-xl shadow-lg p-6 sticky top-4">
+                <h2 class="text-xl font-semibold mb-4">About This Group</h2>
+                <p class="text-gray-600 mb-6">{{ group.description }}</p>
+                
+                {% if not is_member %}
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                    <p class="text-sm text-yellow-800">
+                        Join this group to participate in discussions and share your experiences.
+                    </p>
+                </div>
+                {% endif %}
+
+                <h3 class="font-medium text-gray-900 mb-2">Group Guidelines</h3>
+                <ul class="space-y-2 text-sm text-gray-600">
+                    <li>• Stay on topic</li>
+                    <li>• Be respectful of others</li>
+                    <li>• Share your experiences</li>
+                    <li>• Keep it constructive</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Toast -->
+<div id="successToast" class="hidden fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded shadow-lg">
+    <span id="successMessage"></span>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const joinButton = document.getElementById('join-group');
+    const createTopicBtn = document.getElementById('createTopicBtn');
+    const createTopicModal = document.getElementById('createTopicModal');
+    const cancelCreateTopicBtn = document.getElementById('cancelCreateTopicBtn');
+    const createTopicForm = document.getElementById('createTopicForm');
+    const successToast = document.getElementById('successToast');
+    const successMessage = document.getElementById('successMessage');
+    const deleteGroupBtn = document.getElementById('deleteGroupBtn');
+
+    function showToast(message, duration = 3000) {
+        successMessage.textContent = message;
+        successToast.classList.remove('hidden');
+        setTimeout(() => {
+            successToast.classList.add('hidden');
+        }, duration);
+    }
+
+    if (joinButton) {
+        joinButton.addEventListener('click', async function() {
+            try {
+                const response = await fetch("{{ url_for('join_group', group_id=group_id) }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast(data.message);
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    alert(data.error || 'Failed to join group');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to join group');
+            }
+        });
+    }
+
+    if (createTopicBtn) {
+        createTopicBtn.addEventListener('click', () => {
+            createTopicModal.classList.remove('hidden');
+        });
+
+        cancelCreateTopicBtn.addEventListener('click', () => {
+            createTopicModal.classList.add('hidden');
+            createTopicForm.reset();
+        });
+
+        createTopicForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(createTopicForm);
+            const formDataObj = {};
+            formData.forEach((value, key) => {
+                formDataObj[key] = value;
+            });
+
+            try {
+                const response = await fetch("{{ url_for('create_topic', group_id=group_id) }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formDataObj)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('Topic created successfully!');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    alert(result.error || 'Failed to create topic');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to create topic. Please try again.');
+            }
+        });
+    }
+
+    if (deleteGroupBtn) {
+        deleteGroupBtn.addEventListener('click', async function() {
+            if (confirm('Are you sure you want to delete this group? This action cannot be undone.')) {
+                try {
+                    const response = await fetch("{{ url_for('delete_group', group_id=group_id) }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        alert('Group deleted successfully');
+                        window.location.href = "{{ url_for('community') }}";
+                    } else {
+                        alert(result.error || 'Failed to delete group');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Failed to delete group');
+                }
+            }
+        });
+    }
+});
+
+async function deleteTopic(topicId) {
+    if (confirm('Are you sure you want to delete this topic? This action cannot be undone.')) {
+        try {
+            const response = await fetch(`{{ url_for('delete_topic', group_id=group_id, topic_id='TOPIC_ID') }}`.replace('TOPIC_ID', topicId), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                alert('Topic deleted successfully');
+                window.location.reload();
+            } else {
+                alert(result.error || 'Failed to delete topic');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to delete topic');
+        }
+    }
+}
+</script>
+{% endblock %}

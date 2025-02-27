@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Hormonal Balance Analysis Results{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-xl shadow-lg p-6 space-y-6">
+            <h2 class="text-2xl font-bold text-gray-800 text-center">Your Hormonal Balance Analysis</h2>
+            
+            <!-- User Information Summary -->
+            <div class="bg-gray-50 p-4 rounded-lg">
+                <h3 class="text-lg font-semibold text-gray-700 mb-2">Profile Summary</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div>
+                        <span class="text-gray-600">Age:</span>
+                        <span class="font-medium">{{ data.age }}</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-600">Gender:</span>
+                        <span class="font-medium">{{ data.gender|title }}</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-600">Height:</span>
+                        <span class="font-medium">{{ data.height }} cm</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-600">Weight:</span>
+                        <span class="font-medium">{{ data.weight }} kg</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Overall Score -->
+            <div class="text-center">
+                <div class="inline-block p-6 bg-gradient-to-r from-pink-100 to-purple-100 rounded-full">
+                    <div class="text-4xl font-bold text-pink-600">{{ overall_score }}</div>
+                    <div class="text-sm text-gray-600">Overall Balance Score</div>
+                </div>
+            </div>
+
+            <!-- Key Metrics -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-pink-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-gray-800">Lifestyle Assessment</h3>
+                    <div class="text-2xl font-bold text-pink-600">{{ lifestyle_score }}</div>
+                    <ul class="text-sm text-gray-600 mt-2 list-disc list-inside">
+                        <li>Sleep: {{ data.sleep_quality|title }}</li>
+                        <li>Exercise: {{ data.exercise_frequency|title }}</li>
+                        <li>Stress: {{ data.stress_level|title }}</li>
+                        <li>Diet: {{ data.diet_quality|title }}</li>
+                    </ul>
+                </div>
+                <div class="bg-purple-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-gray-800">Symptom Analysis</h3>
+                    <div class="text-2xl font-bold text-purple-600">{{ symptom_score }}</div>
+                    <div class="text-sm text-gray-600 mt-2">
+                        {% if data.symptoms %}
+                        <p>Reported symptoms:</p>
+                        <ul class="list-disc list-inside">
+                            {% for symptom in data.symptoms %}
+                            <li>{{ symptom|replace('_', ' ')|title }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p>No symptoms reported</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-gray-800">Health Status</h3>
+                    <div class="text-2xl font-bold text-blue-600">{{ health_score }}</div>
+                    <div class="text-sm text-gray-600 mt-2">
+                        <p>BMI Category: {{ bmi_category }}</p>
+                        {% if data.medical_conditions %}
+                        <p class="mt-2">Medical conditions:</p>
+                        <ul class="list-disc list-inside">
+                            {% for condition in data.medical_conditions %}
+                            <li>{{ condition|replace('_', ' ')|title }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analysis Details -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h4 class="font-semibold text-green-800">Strengths</h4>
+                    <ul class="list-disc list-inside text-sm text-gray-600 mt-2">
+                        {% for strength in strengths %}
+                        <li>{{ strength }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="bg-yellow-50 p-4 rounded-lg">
+                    <h4 class="font-semibold text-yellow-800">Areas for Improvement</h4>
+                    <ul class="list-disc list-inside text-sm text-gray-600 mt-2">
+                        {% for improvement in improvements %}
+                        <li>{{ improvement }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Recommendations -->
+            <div class="bg-gray-50 p-4 rounded-lg">
+                <h3 class="text-xl font-semibold text-gray-800 mb-3">Personalized Recommendations</h3>
+                <div class="space-y-2">
+                    {% for recommendation in recommendations %}
+                    <div class="flex items-start space-x-2">
+                        <svg class="w-5 h-5 text-pink-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                        <p class="text-gray-600">{{ recommendation }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex justify-center space-x-4 mt-6">
+                <a href="{{ url_for('hormonal_balance.show_form') }}" 
+                   class="px-6 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors">
+                    Take Assessment Again
+                </a>
+                <a href="{{ url_for('home') }}"
+                   class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                    Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

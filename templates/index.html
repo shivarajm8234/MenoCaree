@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MenoCare - AI-Powered Menopause Support</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">MenoCare</div>
+            <ul>
+                <li><a href="#symptom-tracker">Symptom Tracker</a></li>
+                <li><a href="#resources">Resources</a></li>
+                <li><a href="#support">Support</a></li>
+                <li><a href="#chat">AI Chat</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="hero">
+            <h1>Empowering Women Through AI-Driven Menopause Care</h1>
+            <p>Your personalized companion for managing menopause with confidence</p>
+        </section>
+
+        <section id="symptom-tracker">
+            <h2>Symptom Tracker</h2>
+            <div class="symptom-form">
+                <div class="symptom-inputs">
+                    <label>
+                        Hot Flashes
+                        <input type="range" min="0" max="10" value="0" class="symptom-slider" data-symptom="hot-flashes">
+                    </label>
+                    <label>
+                        Mood Changes
+                        <input type="range" min="0" max="10" value="0" class="symptom-slider" data-symptom="mood">
+                    </label>
+                    <label>
+                        Sleep Issues
+                        <input type="range" min="0" max="10" value="0" class="symptom-slider" data-symptom="sleep">
+                    </label>
+                </div>
+                <button id="analyze-symptoms">Analyze Symptoms</button>
+                <div id="symptom-analysis-result"></div>
+            </div>
+        </section>
+
+        <section id="ai-chat">
+            <h2>AI Support Chat</h2>
+            <div class="chat-container">
+                <div id="chat-messages"></div>
+                <div class="chat-input">
+                    <input type="text" id="user-message" placeholder="Type your question...">
+                    <button id="send-message">Send</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 MenoCare. All rights reserved.</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,316 @@
+{% extends "base.html" %}
+
+{% block title %}Health Quiz{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-b from-indigo-50 to-purple-50 py-12">
+    <div class="container mx-auto px-4">
+        <div class="max-w-5xl mx-auto">
+            <!-- Main Card -->
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden backdrop-blur-lg border border-indigo-100">
+                <!-- Header Section -->
+                <div class="bg-gradient-to-r from-indigo-600 to-purple-700 p-10 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-pattern opacity-10"></div>
+                    <div class="relative z-10">
+                        <h1 class="text-4xl font-bold text-white text-center mb-3">Menstrual Health Quiz</h1>
+                        <p class="text-indigo-100 text-center text-lg">Test your knowledge about menstrual health and wellness!</p>
+                    </div>
+                </div>
+
+                <!-- Quiz Content -->
+                <div class="p-8">
+                    <!-- Navigation -->
+                    <div class="flex items-center justify-between mb-8">
+                        <a href="{{ url_for('games.games_dashboard') }}" class="flex items-center text-indigo-600 hover:text-indigo-800 transition-colors">
+                            <i class="fas fa-chevron-left mr-2"></i>
+                            <span>Back to Games</span>
+                        </a>
+                        <div class="flex space-x-4">
+                            <a href="{{ url_for('games.memory_game') }}" class="px-4 py-2 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors">Memory Match</a>
+                            <a href="{{ url_for('games.mood_matcher_game') }}" class="px-4 py-2 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors">Mood Matcher</a>
+                            <a href="{{ url_for('games.breathing_game') }}" class="px-4 py-2 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors">Breathing Exercise</a>
+                        </div>
+                    </div>
+
+                    <!-- Quiz Stats -->
+                    <div class="bg-indigo-50 rounded-xl p-6 mb-8">
+                        <div class="flex justify-center gap-8">
+                            <div class="text-center">
+                                <p class="text-indigo-600 mb-1">Score</p>
+                                <p class="text-2xl font-bold text-indigo-700" id="score">0</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-indigo-600 mb-1">Progress</p>
+                                <div class="relative pt-1">
+                                    <div class="flex mb-2 items-center justify-between">
+                                        <div>
+                                            <span id="progress" class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-indigo-600 bg-indigo-200">
+                                                0%
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-indigo-200">
+                                        <div id="progress-bar" style="width:0%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-indigo-500"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quiz Question -->
+                    <div id="quiz" class="bg-white rounded-xl border border-indigo-100 p-6 mb-8">
+                        <div id="question" class="text-xl font-semibold text-indigo-800 mb-6"></div>
+                        <div id="options" class="space-y-4">
+                            <!-- Options will be inserted here by JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Quiz Navigation -->
+                    <div class="text-center" id="quiz-nav">
+                        <button onclick="nextQuestion()" 
+                                class="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-600 transition-colors shadow-md">
+                            Next Question
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const questions = [
+    {
+        question: "What is the average length of a menstrual cycle?",
+        options: ["21 days", "28 days", "35 days", "40 days"],
+        correct: 1,
+        explanation: "The average menstrual cycle is 28 days, although it can range from 21 to 35 days."
+    },
+    {
+        question: "Which hormone triggers ovulation?",
+        options: ["Estrogen", "Luteinizing Hormone (LH)", "Progesterone", "Follicle Stimulating Hormone (FSH)"],
+        correct: 1,
+        explanation: "Luteinizing Hormone (LH) surge triggers ovulation during the menstrual cycle."
+    },
+    {
+        question: "What is the typical length of menstruation?",
+        options: ["2-3 days", "3-7 days", "7-10 days", "10-14 days"],
+        correct: 1,
+        explanation: "A typical period lasts 3-7 days, with most women experiencing flow for about 5 days."
+    },
+    {
+        question: "Which of these is NOT a common PMS symptom?",
+        options: ["Mood swings", "Bloating", "High fever", "Breast tenderness"],
+        correct: 2,
+        explanation: "High fever is not a typical PMS symptom. If you experience fever during menstruation, consult a healthcare provider."
+    },
+    {
+        question: "What is the most fertile time of the menstrual cycle?",
+        options: ["During menstruation", "Just before ovulation", "Just after menstruation", "End of the cycle"],
+        correct: 1,
+        explanation: "The most fertile period is just before ovulation, typically around day 14 of a 28-day cycle."
+    }
+];
+
+let currentQuestion = 0;
+let score = 0;
+let selectedOption = null;
+let startTime = null;
+let streakCount = 0;
+
+function startQuiz() {
+    startTime = Date.now();
+    displayQuestion();
+}
+
+function updateProgress() {
+    const progress = Math.round((currentQuestion / questions.length) * 100);
+    document.getElementById('progress').textContent = `${progress}%`;
+    document.getElementById('progress-bar').style.width = `${progress}%`;
+}
+
+function displayQuestion() {
+    const question = questions[currentQuestion];
+    document.getElementById('question').textContent = question.question;
+    
+    const optionsContainer = document.getElementById('options');
+    optionsContainer.innerHTML = '';
+    
+    question.options.forEach((option, index) => {
+        const optionDiv = document.createElement('div');
+        optionDiv.className = 'option';
+        optionDiv.textContent = option;
+        optionDiv.onclick = () => selectOption(index);
+        optionsContainer.appendChild(optionDiv);
+    });
+    
+    updateProgress();
+}
+
+function selectOption(index) {
+    const options = document.querySelectorAll('.option');
+    options.forEach(option => {
+        option.classList.remove('selected', 'correct', 'incorrect');
+    });
+    options[index].classList.add('selected');
+    selectedOption = index;
+    
+    // Show the explanation
+    const question = questions[currentQuestion];
+    if (index === question.correct) {
+        options[index].classList.add('correct');
+        showToast('Correct! ' + question.explanation, 'success');
+        streakCount++;
+    } else {
+        options[index].classList.add('incorrect');
+        options[question.correct].classList.add('correct');
+        showToast('Incorrect. ' + question.explanation, 'error');
+        streakCount = 0;
+    }
+}
+
+function nextQuestion() {
+    if (selectedOption !== null) {
+        if (selectedOption === questions[currentQuestion].correct) {
+            // Base score
+            let questionScore = 100;
+            
+            // Time bonus (if answered within 15 seconds)
+            const timeSpent = (Date.now() - startTime) / 1000;
+            if (timeSpent < 15) {
+                questionScore += Math.round((15 - timeSpent) * 5); // Up to 75 bonus points
+            }
+            
+            // Streak bonus
+            if (streakCount > 1) {
+                questionScore += streakCount * 25; // 25 points per streak
+            }
+            
+            score += questionScore;
+            document.getElementById('score').textContent = score;
+        }
+        
+        currentQuestion++;
+        selectedOption = null;
+        
+        if (currentQuestion < questions.length) {
+            displayQuestion();
+        } else {
+            showFinalScore();
+        }
+    }
+}
+
+function showFinalScore() {
+    const quizContainer = document.getElementById('quiz');
+    const quizNav = document.getElementById('quiz-nav');
+    const timeTaken = Math.round((Date.now() - startTime) / 1000);
+    const finalScore = score;
+    
+    quizContainer.innerHTML = `
+        <div class="text-center">
+            <h2 class="text-2xl font-bold text-indigo-700 mb-4">Quiz Complete!</h2>
+            <div class="bg-indigo-50 rounded-xl p-6 mb-6">
+                <p class="text-xl font-semibold text-indigo-700 mb-4">Your Results</p>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-indigo-600">Final Score</p>
+                        <p class="text-2xl font-bold text-indigo-700">${finalScore}</p>
+                    </div>
+                    <div>
+                        <p class="text-indigo-600">Time Taken</p>
+                        <p class="text-2xl font-bold text-indigo-700">${timeTaken}s</p>
+                    </div>
+                    <div>
+                        <p class="text-indigo-600">Correct Answers</p>
+                        <p class="text-2xl font-bold text-indigo-700">${score/100}/${questions.length}</p>
+                    </div>
+                    <div>
+                        <p class="text-indigo-600">Accuracy</p>
+                        <p class="text-2xl font-bold text-indigo-700">${Math.round((score/100/questions.length)*100)}%</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-indigo-50 rounded-xl p-6 mb-6">
+                <p class="text-lg font-semibold text-indigo-700">
+                    ${getAchievementMessage(finalScore, timeTaken)}
+                </p>
+            </div>
+        </div>
+    `;
+    
+    quizNav.innerHTML = `
+        <button onclick="location.reload()" 
+                class="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-600 transition-colors shadow-md">
+            Try Again
+        </button>
+    `;
+}
+
+function getAchievementMessage(score, time) {
+    if (score >= 600 && time < 60) {
+        return "🏆 Outstanding! You're a menstrual health expert with lightning-fast knowledge!";
+    } else if (score >= 500) {
+        return "🌟 Excellent! Your understanding of menstrual health is impressive!";
+    } else if (score >= 400) {
+        return "👏 Great job! You have a solid grasp of menstrual health concepts!";
+    } else if (score >= 300) {
+        return "✨ Good effort! Keep learning to improve your knowledge!";
+    } else {
+        return "📚 Keep studying! Understanding menstrual health is important for overall wellness.";
+    }
+}
+
+function showToast(message, type) {
+    const toast = document.createElement('div');
+    toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg text-white transform transition-all duration-500 ${
+        type === 'success' ? 'bg-green-500' : 'bg-red-500'
+    }`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 500);
+    }, 3000);
+}
+
+// Start the quiz when the page loads
+document.addEventListener('DOMContentLoaded', startQuiz);
+</script>
+
+<style>
+.bg-pattern {
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+.option {
+    @apply p-4 rounded-lg border border-indigo-200 cursor-pointer transition-all duration-200;
+}
+
+.option:hover {
+    @apply bg-indigo-50 border-indigo-300;
+}
+
+.option.selected {
+    @apply bg-indigo-100 border-indigo-400;
+}
+
+.option.correct {
+    @apply bg-green-100 border-green-400 text-green-700;
+}
+
+.option.incorrect {
+    @apply bg-red-100 border-red-400 text-red-700;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.option.correct {
+    animation: pulse 0.5s ease-in-out;
+}
+</style>
+{% endblock %}

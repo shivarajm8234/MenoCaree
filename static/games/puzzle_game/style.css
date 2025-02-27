@@ -1,0 +1,42 @@
+#puzzle-container {
+    display: grid;
+    gap: 2px;
+    background: #34495e;
+    padding: 5px;
+    border-radius: 10px;
+}
+
+.puzzle-piece {
+    width: 100px;
+    height: 100px;
+    background-size: cover;
+    border: 2px solid #fff;
+    cursor: pointer;
+    transition: transform 0.2s;
+    border-radius: 5px;
+}
+
+.puzzle-piece:hover {
+    transform: scale(0.95);
+}
+
+.puzzle-piece.empty {
+    background: #34495e !important;
+    border: 2px dashed #fff;
+}
+
+.puzzle-piece.selected {
+    transform: scale(0.95);
+    border-color: #f59e0b;
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+}
+
+.completed {
+    animation: completion 1s ease-in-out;
+}
+
+@keyframes completion {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}

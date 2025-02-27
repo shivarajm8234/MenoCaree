@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+
+{% block title %}Hormonal Balance Analysis{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center">Hormonal Balance Analysis</h1>
+
+        <form id="hormonalBalanceForm" class="space-y-6 bg-white rounded-xl shadow-lg p-6">
+            <!-- Basic Information -->
+            <div class="space-y-4">
+                <h3 class="text-xl font-semibold text-gray-800">Basic Information</h3>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Age</label>
+                    <input type="number" name="age" required min="18" max="100"
+                           class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                    <select name="gender" required
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500">
+                        <option value="">Select gender</option>
+                        <option value="female">Female</option>
+                        <option value="male">Male</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Height (cm)</label>
+                    <input type="number" name="height" required min="100" max="250"
+                           class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Weight (kg)</label>
+                    <input type="number" name="weight" required min="30" max="200"
+                           class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500">
+                </div>
+            </div>
+
+            <!-- Lifestyle Factors -->
+            <div class="space-y-4 mt-8">
+                <h3 class="text-xl font-semibold text-gray-800">Lifestyle Factors</h3>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Sleep Quality</label>
+                    <select name="sleep_quality" required
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500">
+                        <option value="good">Good (7-9 hours, feel refreshed)</option>
+                        <option value="fair">Fair (6-7 hours, sometimes tired)</option>
+                        <option value="poor">Poor (Less than 6 hours or disturbed)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Exercise Frequency</label>
+                    <select name="exercise_frequency" required
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500">
+                        <option value="high">Regular (3+ times/week)</option>
+                        <option value="moderate">Moderate (1-2 times/week)</option>
+                        <option value="low">Rarely</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Stress Level</label>
+                    <select name="stress_level" required
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500">
+                        <option value="low">Low (Generally relaxed)</option>
+                        <option value="moderate">Moderate (Sometimes stressed)</option>
+                        <option value="high">High (Often stressed)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Diet Quality</label>
+                    <select name="diet_quality" required
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500">
+                        <option value="excellent">Excellent (Balanced, whole foods)</option>
+                        <option value="good">Good (Mostly healthy)</option>
+                        <option value="fair">Fair (Mixed healthy/unhealthy)</option>
+                        <option value="poor">Poor (Mostly processed foods)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Symptoms -->
+            <div class="space-y-4 mt-8">
+                <h3 class="text-xl font-semibold text-gray-800">Symptoms & Health Indicators</h3>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Energy Levels</label>
+                    <select name="energy_levels" required
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500">
+                        <option value="high">High (Energetic most days)</option>
+                        <option value="moderate">Moderate (Some ups and downs)</option>
+                        <option value="low">Low (Often tired)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Mood Stability</label>
+                    <select name="mood_stability" required
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500">
+                        <option value="stable">Stable (Consistent mood)</option>
+                        <option value="somewhat_stable">Somewhat Stable (Occasional mood swings)</option>
+                        <option value="unstable">Unstable (Frequent mood changes)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Common Symptoms (Select all that apply)</label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" name="symptoms" value="fatigue" class="form-checkbox text-pink-500">
+                            <span>Fatigue</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" name="symptoms" value="weight_changes" class="form-checkbox text-pink-500">
+                            <span>Weight Changes</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" name="symptoms" value="mood_swings" class="form-checkbox text-pink-500">
+                            <span>Mood Swings</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" name="symptoms" value="anxiety" class="form-checkbox text-pink-500">
+                            <span>Anxiety</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" name="symptoms" value="hot_flashes" class="form-checkbox text-pink-500">
+                            <span>Hot Flashes</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" name="symptoms" value="irregular_periods" class="form-checkbox text-pink-500">
+                            <span>Irregular Periods</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" name="symptoms" value="skin_issues" class="form-checkbox text-pink-500">
+                            <span>Skin Issues</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" name="symptoms" value="digestive_issues" class="form-checkbox text-pink-500">
+                            <span>Digestive Issues</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Menstrual Cycle (if applicable)</label>
+                    <select name="menstrual_regularity"
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500">
+                        <option value="not_applicable">Not Applicable</option>
+                        <option value="regular">Regular (Every 25-35 days)</option>
+                        <option value="somewhat_irregular">Somewhat Irregular</option>
+                        <option value="very_irregular">Very Irregular</option>
+                        <option value="absent">Absent</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Medical History -->
+            <div class="space-y-4 mt-8">
+                <h3 class="text-xl font-semibold text-gray-800">Medical History</h3>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Existing Medical Conditions (Select all that apply)</label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" name="medical_conditions" value="thyroid" class="form-checkbox text-pink-500">
+                            <span>Thyroid Issues</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" name="medical_conditions" value="pcos" class="form-checkbox text-pink-500">
+                            <span>PCOS</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" name="medical_conditions" value="diabetes" class="form-checkbox text-pink-500">
+                            <span>Diabetes</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" name="medical_conditions" value="hypertension" class="form-checkbox text-pink-500">
+                            <span>Hypertension</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Current Medications</label>
+                    <select name="medications"
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500">
+                        <option value="none">None</option>
+                        <option value="hormonal_birth_control">Hormonal Birth Control</option>
+                        <option value="thyroid_medication">Thyroid Medication</option>
+                        <option value="other">Other Hormone-Related Medication</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" 
+                    class="w-full px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold rounded-xl 
+                           shadow-lg hover:from-pink-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-pink-500">
+                Generate Analysis
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('hormonalBalanceForm');
+    
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const submitButton = form.querySelector('button[type="submit"]');
+        const originalText = submitButton.textContent;
+        submitButton.textContent = 'Analyzing...';
+        submitButton.disabled = true;
+        
+        try {
+            const formData = new FormData(form);
+            const data = {
+                symptoms: [],
+                medical_conditions: []
+            };
+            
+            for (let [key, value] of formData.entries()) {
+                if (key === 'age' || key === 'height' || key === 'weight') {
+                    data[key] = parseInt(value);
+                } else if (key === 'symptoms') {
+                    data.symptoms.push(value);
+                } else if (key === 'medical_conditions') {
+                    data.medical_conditions.push(value);
+                } else {
+                    data[key] = value;
+                }
+            }
+            
+            const response = await fetch("{{ url_for('hormonal_balance.analyze') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok && result.redirect) {
+                window.location.href = result.redirect;
+            } else {
+                throw new Error(result.error || 'Failed to analyze data');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert(error.message || 'An error occurred. Please try again.');
+        } finally {
+            submitButton.textContent = originalText;
+            submitButton.disabled = false;
+        }
+    });
+});
+</script>
+{% endblock %}

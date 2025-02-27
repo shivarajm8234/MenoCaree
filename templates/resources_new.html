@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}MenoCare - Resources{% endblock %}
+
+{% block content %}
+<!-- Your existing content here -->
+
+<!-- Resource Content Modal -->
+<div id="resourceModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h3 id="modalTitle" class="text-2xl font-bold"></h3>
+            <button onclick="closeResourceModal()" class="text-gray-500 hover:text-gray-700">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <div id="modalContent" class="prose max-w-none"></div>
+    </div>
+</div>
+
+<!-- Article Modal -->
+<div id="articleModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+    <!-- Your existing article modal content -->
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Add resource content script -->
+<script src="{{ url_for('static', filename='js/resource-content.js') }}"></script>
+<script>
+    // Your existing article management code
+</script>
+{% endblock %}

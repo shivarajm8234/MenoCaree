@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MenoCare{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#ff69b4',
+                        secondary: '#4a90e2',
+                        accent: '#8a2be2',
+                        background: '#f9f9f9'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Base input styles */
+        input[type="text"],
+        input[type="number"],
+        input[type="date"],
+        textarea,
+        select {
+            @apply mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm;
+        }
+        
+        /* Button styles */
+        .btn-primary {
+            @apply inline-flex items-center px-4 py-2 bg-primary border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-pink-600 active:bg-pink-700 focus:outline-none focus:border-pink-700 focus:ring focus:ring-pink-200 disabled:opacity-25 transition;
+        }
+
+        
+        .btn-secondary {
+            @apply inline-flex items-center px-4 py-2 bg-secondary border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-600 active:bg-blue-700 focus:outline-none focus:border-blue-700 focus:ring focus:ring-blue-200 disabled:opacity-25 transition;
+        }
+
+        /* Sidebar styles */
+        .sidebar {
+            width: 250px;
+            transition: 
+all 0.3s;
+        }
+        
+        .sidebar-collapsed {
+            width: 60px;
+        }
+
+        .content-expanded {
+            margin-left: 250px;
+        }
+
+        .content-collapsed {
+            margin-left: 60px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .content-expanded,
+            .content-collapsed {
+                margin-left: 0;
+            }
+        }
+
+        /* Navigation styles */
+        .nav-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        
+        .nav-content.show {
+            max-height: 500px; /* Adjust based on content */
+        }
+        
+        .nav-header i {
+            transition: transform 0.3s ease;
+        }
+        
+        .nav-header.active i {
+            transform: rotate(180deg);
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-background min-h-screen flex">
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar bg-white shadow-lg fixed h-full overflow-y-auto z-50" x-data="{ open: true }">
+        <div class="p-4 flex justify-between items-center border-b">
+            <a href="{{ url_for('home') }}" class="text-primary font-bold text-xl">MenoCare</a>
+            <button @click="open = !open" class="text-gray-500 hover:text-primary">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        <nav class="mt-4">
+            <div class="px-4 py-2">
+                <div class="flex items-center justify-between cursor-pointer nav-header" data-target="main-features">
+                    <h5 class="text-xs uppercase text-gray-500 font-semibold">Main Features</h5>
+                    <i class="fas fa-chevron-down text-gray-500 transition-transform duration-200"></i>
+                </div>
+                <ul class="mt-2 space-y-2 nav-content" id="main-features">
+                    <li>
+                        <a href="{{ url_for('home') }}" class="flex items-center p-2 text-gray-600 hover:bg-pink-50 hover:text-primary rounded-md">
+                            <i class="fas fa-home w-5 h-5 mr-3"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('symptom_tracker') }}" class="flex items-center p-2 text-gray-600 hover:bg-pink-50 hover:text-primary rounded-md">
+                            <i class="fas fa-chart-line w-5 h-5 mr-3"></i>
+                            <span>Symptom Tracker</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('pregnancy.index') }}" class="flex items-center p-2 text-gray-600 hover:bg-pink-50 hover:text-primary rounded-md">
+                            <i class="fas fa-baby w-5 h-5 mr-3"></i>
+                            <span>Pregnancy</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('menopause') }}" class="flex items-center p-2 text-gray-600 hover:bg-pink-50 hover:text-primary rounded-md">
+                            <i class="fas fa-female w-5 h-5 mr-3"></i>
+                            <span>Menopause</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('cycle_tracker') }}" class="flex items-center p-2 text-gray-600 hover:bg-pink-50 hover:text-primary rounded-md">
+                            <i class="fas fa-calendar-alt w-5 h-5 mr-3"></i>
+                            <span>Cycle Tracker</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('games.games_dashboard') }}" class="flex items-center p-2 text-gray-600 hover:bg-pink-50 hover:text-primary rounded-md">
+                            <i class="fas fa-gamepad w-5 h-5 mr-3"></i>
+                            <span>Stress Relief Games</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="px-4 py-2 mt-4">
+                <div class="flex items-center justify-between cursor-pointer nav-header" data-target="ai-features">
+                    <h5 class="text-xs uppercase text-gray-500 font-semibold">AI Features</h5>
+                    <i class="fas fa-chevron-down text-gray-500 transition-transform duration-200"></i>
+                </div>
+                <ul class="mt-2 space-y-2 nav-content" id="ai-features">
+                    <li>
+                        <a href="{{ url_for('hormonal_balance.show_form') }}" class="flex items-center p-2 text-gray-600 hover:bg-pink-50 hover:text-primary rounded-md">
+                            <i class="fas fa-brain w-5 h-5 mr-3"></i>
+                            <span>Hormonal Balance AI</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('ai_chat') }}" class="flex items-center p-2 text-gray-600 hover:bg-pink-50 hover:text-primary rounded-md">
+                            <i class="fas fa-robot w-5 h-5 mr-3"></i>
+                            <span>AI Support</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="px-4 py-2 mt-4">
+                <div class="flex items-center justify-between cursor-pointer nav-header" data-target="health-wellness">
+                    <h5 class="text-xs uppercase text-gray-500 font-semibold">Health & Wellness</h5>
+                    <i class="fas fa-chevron-down text-gray-500 transition-transform duration-200"></i>
+                </div>
+                <ul class="mt-2 space-y-2 nav-content" id="health-wellness">
+                    <li>
+                        <a href="{{ url_for('period_health.health_report') }}" class="flex items-center p-2 text-gray-600 hover:bg-pink-50 hover:text-primary rounded-md">
+                            <i class="fas fa-file-medical w-5 h-5 mr-3"></i>
+                            <span>Health Report</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="px-4 py-2 mt-4">
+                <div class="flex items-center justify-between cursor-pointer nav-header" data-target="community">
+                    <h5 class="text-xs uppercase text-gray-500 font-semibold">Community</h5>
+                    <i class="fas fa-chevron-down text-gray-500 transition-transform duration-200"></i>
+                </div>
+                <ul class="mt-2 space-y-2 nav-content" id="community">
+                    <li>
+                        <a href="{{ url_for('resources') }}" class="flex items-center p-2 text-gray-600 hover:bg-pink-50 hover:text-primary rounded-md">
+                            <i class="fas fa-book w-5 h-5 mr-3"></i>
+                            <span>Resources</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('community') }}" class="flex items-center p-2 text-gray-600 hover:bg-pink-50 hover:text-primary rounded-md">
+                            <i class="fas fa-users w-5 h-5 mr-3"></i>
+                            <span>Community</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Main Content Wrapper -->
+    <div id="content" class="flex-1 content-expanded transition-all duration-300">
+        <!-- Top Navigation -->
+        <header class="bg-white shadow-sm h-16 fixed w-full z-40">
+            <div class="flex justify-end h-full px-4">
+                <!-- User Menu -->
+                <div class="flex items-center">
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" class="flex items-center space-x-2 text-gray-700 hover:text-gray-900 focus:outline-none">
+                            <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center">
+                                <span class="text-sm font-medium">{{ session.get('username', 'U')[0].upper() }}</span>
+                            </div>
+                            <span class="hidden md:inline-block">{{ session.get('username', '') }}</span>
+                        </button>
+
+                        <div x-show="open" 
+                             @click.away="open = false"
+                             class="absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5"
+                             style="display: none;">
+                            <div class="px-4 py-2 text-sm text-gray-700 border-b">
+                                Signed in as<br>
+                                <strong>{{ session.get('username', '') }}</strong>
+                            </div>
+                            <div class="px-4 py-2 text-sm text-gray-700 border-b">
+                                Language: English
+                            </div>
+                            <a href="{{ url_for('logout') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                Sign out
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="pt-16 px-6 py-8">
+            {% block content %}{% endblock %}
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-white border-t border-gray-200 mt-auto">
+            <div class="container mx-auto px-4 py-6">
+                <p class="text-center text-gray-600">&copy; 2024 MenoCare. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Common JavaScript -->
+    <script>
+        // Sidebar toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const content = document.getElementById('content');
+            const toggleBtn = sidebar.querySelector('button');
+
+            toggleBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('sidebar-collapsed');
+                content.classList.toggle('content-expanded');
+                content.classList.toggle('content-collapsed');
+            });
+
+            // Mobile menu
+            const mobileToggle = document.querySelector('[data-mobile-toggle]');
+            if (mobileToggle) {
+                mobileToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('active');
+                });
+            }
+
+            // Initialize navigation headers
+            document.querySelectorAll('.nav-header').forEach(header => {
+                header.addEventListener('click', function() {
+                    const targetId = this.dataset.target;
+                    const content = document.getElementById(targetId);
+                    
+                    // Toggle active state
+                    this.classList.toggle('active');
+                    content.classList.toggle('show');
+                    
+                    // Close other sections
+                    document.querySelectorAll('.nav-content').forEach(item => {
+                        if (item.id !== targetId && item.classList.contains('show')) {
+                            item.classList.remove('show');
+                            const otherHeader = document.querySelector(`[data-target="${item.id}"]`);
+                            if (otherHeader) {
+                                otherHeader.classList.remove('active');
+                            }
+                        }
+                    });
+                });
+            });
+
+            // Show main features by default
+            const mainFeatures = document.querySelector('[data-target="main-features"]');
+            if (mainFeatures) {
+                mainFeatures.click();
+            }
+        });
+
+        // Common utility functions
+        const showLoading = () => {
+            const loading = document.createElement('div');
+            loading.id = 'loading-indicator';
+            loading.className = 'fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50 z-50';
+            loading.innerHTML = `
+                <div class="bg-white p-4 rounded-lg shadow-lg flex items-center space-x-3">
+                    <div class="animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent"></div>
+                    <span class="text-gray-700">Loading...</span>
+                </div>
+            `;
+            document.body.appendChild(loading);
+        };
+
+        const hideLoading = () => {
+            const loading = document.getElementById('loading-indicator');
+            if (loading) {
+                loading.remove();
+            }
+        };
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,537 @@
+{% extends "base.html" %}
+
+{% block title %}Cycle Tracker - MenoCare{% endblock %}
+
+{% block extra_css %}
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.css' rel='stylesheet' />
+<style>
+    .fc-event {
+        cursor: pointer;
+        padding: 2px;
+        margin: 1px 0;
+        transition: transform 0.2s ease;
+    }
+    .fc-event:hover {
+        transform: scale(1.05);
+    }
+    .past-period {
+        background-color: #ff69b4 !important;
+        border-color: #ff69b4 !important;
+        color: white !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .predicted-period {
+        background-color: #ff69b4 !important;
+        border-color: #ff69b4 !important;
+        color: white !important;
+        opacity: 0.7;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .period-dot {
+        width: 8px;
+        height: 8px;
+        background-color: #ff69b4;
+        border-radius: 50%;
+        margin: 2px auto;
+        display: inline-block;
+        box-shadow: 0 0 4px rgba(255,105,180,0.5);
+    }
+    .fc-daygrid-day.has-period {
+        background-color: rgba(255,105,180,0.1);
+        transition: background-color 0.3s ease;
+    }
+    .fc-daygrid-day.has-period:hover {
+        background-color: rgba(255,105,180,0.2);
+    }
+    .fc-daygrid-day.has-period .fc-daygrid-day-top {
+        justify-content: center;
+        padding-top: 4px;
+    }
+    .fc-event-title {
+        padding: 2px 4px;
+        font-weight: bold;
+    }
+    .spinner {
+        animation: spin 1s linear infinite;
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid #ff69b4;
+        border-radius: 50%;
+        width: 16px;
+        height: 16px;
+        display: inline-block;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    /* Modal styles */
+    .modal-overlay {
+        background-color: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        transition: all 0.3s ease-in-out;
+    }
+    .modal-content {
+        max-height: 80vh;
+        overflow-y: auto;
+        transform: scale(0.95);
+        opacity: 0;
+        transition: all 0.3s ease-in-out;
+    }
+    .modal-content.show {
+        transform: scale(1);
+        opacity: 1;
+    }
+    
+    /* Form styles */
+    .form-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .form-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    .input-group {
+        margin-bottom: 1rem;
+    }
+    .input-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #4a5568;
+        font-weight: 500;
+    }
+    .input-group input, .input-group select, .input-group textarea {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.375rem;
+        transition: all 0.3s ease;
+    }
+    .input-group input:focus, .input-group select:focus, .input-group textarea:focus {
+        border-color: #ff69b4;
+        box-shadow: 0 0 0 3px rgba(255,105,180,0.2);
+        outline: none;
+    }
+    .btn-primary, .btn-secondary {
+        transition: all 0.3s ease;
+    }
+    .btn-primary:hover, .btn-secondary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold text-gray-900 mb-2">Cycle Tracker</h1>
+        <p class="text-gray-600">Track and monitor your menstrual cycle with ease</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Calendar Section -->
+        <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+            <div id="calendar" class="min-h-[500px]"></div>
+        </div>
+
+        <!-- Log Cycle Data Section -->
+        <div class="space-y-8">
+            <!-- Form Card -->
+            <div class="form-card flex flex-col rounded-lg shadow-lg overflow-hidden bg-white">
+                <div class="bg-gradient-to-r from-pink-500 to-purple-500 p-4">
+                    <h2 class="text-xl font-semibold text-white">Log Cycle Data</h2>
+                </div>
+                <div class="p-6">
+                    <div class="mb-6">
+                        <p class="text-gray-600">Keep track of your cycle</p>
+                    </div>
+                    <form id="logCycleForm" class="space-y-6">
+                        <div class="input-group">
+                            <label for="dob">Date of Birth</label>
+                            <input type="date" id="dob" name="dob" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="last_period">Last Period Start Date</label>
+                            <input type="date" id="last_period" name="last_period" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="cycle_length">Average Cycle Length (days)</label>
+                            <input type="number" id="cycle_length" name="cycle_length" min="20" max="45" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="health_issues">Health Issues (optional)</label>
+                            <textarea id="health_issues" name="health_issues" rows="3" 
+                                placeholder="Enter any health issues or concerns..."></textarea>
+                        </div>
+                        <button type="submit" class="w-full btn-primary py-2 px-4 rounded-md bg-pink-500 text-white hover:bg-pink-600">
+                            Log Cycle Data
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Health Questionnaire Modal -->
+    <div id="healthModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center">
+        <div class="modal-content bg-white rounded-lg shadow-xl max-w-2xl w-full m-4 max-h-[90vh] overflow-y-auto">
+            <div class="bg-gradient-to-r from-pink-500 to-purple-500 p-4">
+                <h3 class="text-lg font-medium text-white">Health Questionnaire</h3>
+            </div>
+            <div class="p-6">
+                <form id="healthQuestionnaireForm">
+                    <div class="space-y-6">
+                        <div class="input-group">
+                            <label>Overall Menstrual Health Rating</label>
+                            <select name="menstrual_health" required>
+                                <option value="">Select a rating</option>
+                                <option value="very_good">Very Good</option>
+                                <option value="good">Good</option>
+                                <option value="fair">Fair</option>
+                                <option value="poor">Poor</option>
+                                <option value="very_poor">Very Poor</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Symptoms (select all that apply)</label>
+                            <div class="mt-2 grid grid-cols-2 gap-4">
+                                <div class="flex items-center space-x-2">
+                                    <input type="checkbox" name="symptoms[]" value="cramps" class="form-checkbox text-pink-500">
+                                    <label>Cramps</label>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <input type="checkbox" name="symptoms[]" value="headaches" class="form-checkbox text-pink-500">
+                                    <label>Headaches</label>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <input type="checkbox" name="symptoms[]" value="mood_swings" class="form-checkbox text-pink-500">
+                                    <label>Mood Swings</label>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <input type="checkbox" name="symptoms[]" value="fatigue" class="form-checkbox text-pink-500">
+                                    <label>Fatigue</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Cycle Regularity</label>
+                            <select name="cycle_regularity" required>
+                                <option value="">Select regularity</option>
+                                <option value="very_regular">Very Regular</option>
+                                <option value="somewhat_regular">Somewhat Regular</option>
+                                <option value="irregular">Irregular</option>
+                                <option value="very_irregular">Very Irregular</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Any specific concerns or questions for the health report?</label>
+                            <textarea name="concerns" rows="4" 
+                                placeholder="Enter your concerns or questions here..."></textarea>
+                        </div>
+
+                        <div class="flex justify-end space-x-4">
+                            <button type="button" onclick="closeHealthModal()" 
+                                class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                                Cancel
+                            </button>
+                            <button type="submit" 
+                                class="px-4 py-2 bg-pink-500 text-white rounded-md hover:bg-pink-600">
+                                Submit
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const calendarEl = document.getElementById('calendar');
+    calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth'
+        },
+        events: [],
+        eventDisplay: 'block',
+        displayEventEnd: false,
+        eventClassNames: function(arg) {
+            return [arg.event.extendedProps.isPast ? 'past-period' : 'predicted-period'];
+        },
+        dayCellDidMount: function(arg) {
+            // Check if this day has an event
+            const events = calendar.getEvents();
+            const hasEvent = events.some(event => {
+                const eventDate = event.start;
+                return eventDate.getDate() === arg.date.getDate() &&
+                       eventDate.getMonth() === arg.date.getMonth() &&
+                       eventDate.getFullYear() === arg.date.getFullYear();
+            });
+            
+            if (hasEvent) {
+                arg.el.classList.add('has-period');
+                const dotEl = document.createElement('div');
+                dotEl.className = 'period-dot';
+                arg.el.querySelector('.fc-daygrid-day-top').appendChild(dotEl);
+            }
+        }
+    });
+    calendar.render();
+    loadCycleData();
+});
+
+async function loadCycleData() {
+    try {
+        const response = await fetch('/get_cycle_data');
+        const data = await response.json();
+        
+        if (data.success && data.cycle_data) {
+            const cycleData = data.cycle_data;
+            
+            // Clear existing events
+            calendar.removeAllEvents();
+            
+            // Add period dates
+            if (cycleData.predictions) {
+                const lastPeriodDate = new Date(cycleData.last_period);
+                
+                cycleData.predictions.forEach(date => {
+                    const startDate = new Date(date);
+                    const endDate = new Date(startDate);
+                    endDate.setDate(endDate.getDate() + 5); // 5-day duration
+                    
+                    const isPast = new Date(date) <= lastPeriodDate;
+                    
+                    calendar.addEvent({
+                        title: isPast ? 'Past Period' : 'Predicted Period',
+                        start: startDate,
+                        end: endDate,
+                        allDay: true,
+                        extendedProps: {
+                            isPast: isPast
+                        }
+                    });
+                });
+            }
+            
+            // Populate form fields
+            document.getElementById('dob').value = cycleData.dob || '';
+            document.getElementById('last_period').value = cycleData.last_period || '';
+            document.getElementById('cycle_length').value = cycleData.cycle_length || '28';
+            document.getElementById('health_issues').value = cycleData.health_issues || '';
+            
+            calendar.render();
+        }
+    } catch (error) {
+        console.error('Error loading cycle data:', error);
+        showAlert('error', 'Failed to load cycle data');
+    }
+}
+
+// Event listeners
+// Validate dates before form submission
+function validateDates() {
+    const dob = new Date(document.getElementById('dob').value);
+    const lastPeriod = new Date(document.getElementById('last_period').value);
+    const today = new Date();
+    
+    // Calculate minimum age date (14 years ago)
+    const minAgeDate = new Date();
+    minAgeDate.setFullYear(minAgeDate.getFullYear() - 14);
+    
+    // Set minimum birth year (1985)
+    const minBirthDate = new Date('1985-01-01');
+    
+    // Validate date of birth
+    if (dob > today) {
+        showAlert('error', 'Date of birth cannot be in the future');
+        return false;
+    }
+    if (dob > minAgeDate) {
+        showAlert('error', 'You must be at least 14 years old');
+        return false;
+    }
+    if (dob < minBirthDate) {
+        showAlert('error', 'Date of birth cannot be earlier than 1985');
+        return false;
+    }
+    
+    // Validate last period date
+    if (lastPeriod > today) {
+        showAlert('error', 'Last period date cannot be in the future');
+        return false;
+    }
+    
+    // Calculate date 6 months ago
+    const sixMonthsAgo = new Date(today);
+    sixMonthsAgo.setMonth(today.getMonth() - 6);
+    
+    if (lastPeriod < sixMonthsAgo) {
+        showAlert('error', 'Last period date cannot be older than 6 months');
+        return false;
+    }
+    
+    return true;
+}
+
+// Add input event listeners for real-time validation
+document.getElementById('dob').addEventListener('input', function() {
+    const dob = new Date(this.value);
+    const today = new Date();
+    const minAgeDate = new Date();
+    minAgeDate.setFullYear(minAgeDate.getFullYear() - 14);
+    const minBirthDate = new Date('1985-01-01');
+    
+    if (dob > today) {
+        this.setCustomValidity('Date of birth cannot be in the future');
+    } else if (dob > minAgeDate) {
+        this.setCustomValidity('You must be at least 14 years old');
+    } else if (dob < minBirthDate) {
+        this.setCustomValidity('Date of birth cannot be earlier than 1985');
+    } else {
+        this.setCustomValidity('');
+    }
+});
+
+document.getElementById('last_period').addEventListener('input', function() {
+    const lastPeriod = new Date(this.value);
+    const today = new Date();
+    
+    // Calculate date 6 months ago
+    const sixMonthsAgo = new Date(today);
+    sixMonthsAgo.setMonth(today.getMonth() - 6);
+    
+    if (lastPeriod > today) {
+        this.setCustomValidity('Last period date cannot be in the future');
+    } else if (lastPeriod < sixMonthsAgo) {
+        this.setCustomValidity('Last period date cannot be older than 6 months');
+    } else {
+        this.setCustomValidity('');
+    }
+});
+
+document.getElementById('logCycleForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    if (!validateDates()) {
+        return;
+    }
+    
+    try {
+        const formData = new FormData(e.target);
+        const response = await fetch('/log_cycle_data', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            showAlert('success', 'Cycle data logged successfully');
+            await loadCycleData(); // Reload calendar data
+        } else {
+            showAlert('error', data.error || 'Failed to log cycle data');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showAlert('error', 'An error occurred while logging cycle data');
+    }
+});
+
+document.getElementById('healthQuestionnaireForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Show loading state
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner mr-2"></span>Generating Report...';
+    
+    // Get form data
+    const formData = new FormData(e.target);
+    const healthData = {
+        menstrual_health: formData.get('menstrual_health'),
+        symptoms: formData.getAll('symptoms[]'),
+        cycle_regularity: formData.get('cycle_regularity'),
+        concerns: formData.get('concerns')
+    };
+    
+    // Validate required fields
+    if (!healthData.menstrual_health || !healthData.cycle_regularity) {
+        showAlert('error', 'Please fill in all required fields.');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+        return;
+    }
+    
+    // Hide the modal
+    document.getElementById('healthModal').classList.add('hidden');
+    
+    // Generate report with questionnaire data
+    fetch('/generate_cycle_report', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(healthData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(data => {
+                throw new Error(data.error || 'Failed to generate report');
+            });
+        }
+        return response.blob();
+    })
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'cycle_report.pdf';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
+        showAlert('success', 'Report generated successfully!');
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('error', error.message || 'Failed to generate report. Please try again.');
+    })
+    .finally(() => {
+        // Reset button state
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    });
+});
+
+document.getElementById('closeModal').addEventListener('click', function() {
+    document.getElementById('healthModal').classList.add('hidden');
+});
+
+function showAlert(type, message) {
+    const alertDiv = document.createElement('div');
+    const bgColor = type === 'success' ? 'bg-green-100 border-green-500 text-green-700' : 'bg-red-100 border-red-500 text-red-700';
+    alertDiv.className = `fixed top-4 right-4 p-4 rounded-lg border ${bgColor} z-50`;
+    alertDiv.innerHTML = message;
+    document.body.appendChild(alertDiv);
+    
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 5000);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+
+{% block title %}MenoCare - Period Health Report Analyzer{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-12">
+    <!-- Hero Section -->
+    <div class="text-center mb-16 bg-gradient-to-r from-primary to-accent text-white py-16 rounded-2xl shadow-lg relative overflow-hidden">
+        <div class="absolute inset-0 bg-pattern opacity-10"></div>
+        <div class="relative z-10">
+            <h1 class="text-4xl md:text-5xl font-bold mb-6">Clinical Health Analysis</h1>
+            <p class="text-xl md:text-2xl max-w-3xl mx-auto">Professional medical insights powered by advanced AI analysis</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mt-12">
+        <!-- Upload Section -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 transform hover:shadow-2xl transition-all duration-300">
+            <div class="flex items-center mb-8">
+                <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                    <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 ml-4">Medical Report Analysis</h2>
+            </div>
+            <form id="reportForm" class="space-y-8">
+                <!-- File Upload -->
+                <div class="space-y-4">
+                    <label for="report" class="block text-lg font-medium text-gray-700">Clinical Report (PDF)</label>
+                    <div class="relative group">
+                        <input type="file" id="report" name="report" accept=".pdf"
+                               class="w-full rounded-xl border-2 border-gray-200 p-4 hover:border-primary focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary-dark">
+                    </div>
+                    <p class="text-sm text-gray-500 mt-2">Upload your medical report in PDF format for comprehensive analysis</p>
+                </div>
+
+                <!-- Clinical Notes -->
+                <div class="space-y-4">
+                    <label for="concerns" class="block text-lg font-medium text-gray-700">Clinical Notes</label>
+                    <div class="relative">
+                        <textarea id="concerns" name="concerns" rows="4" 
+                                  class="w-full rounded-xl border-2 border-gray-200 p-4 hover:border-primary focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all resize-none"
+                                  placeholder="Provide additional clinical information, symptoms, or specific areas of concern..."></textarea>
+                    </div>
+                    <p class="text-sm text-gray-500">Include relevant medical history or specific symptoms for more accurate analysis</p>
+                </div>
+
+                <button type="submit" class="w-full bg-gradient-to-r from-primary to-accent text-white py-4 px-8 rounded-xl font-semibold text-lg hover:opacity-90 transform hover:scale-[1.02] transition-all duration-300 shadow-lg flex items-center justify-center group">
+                    <svg class="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                    </svg>
+                    Generate Clinical Analysis
+                </button>
+            </form>
+            <div id="error-message" class="mt-6 p-4 bg-red-50 text-red-700 rounded-lg hidden"></div>
+            <div id="success-message" class="mt-6 p-4 bg-green-50 text-green-700 rounded-lg hidden"></div>
+        </div>
+
+        <!-- Analysis Results -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 transform hover:shadow-2xl transition-all duration-300">
+            <div class="flex items-center mb-8">
+                <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                    <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 ml-4">Clinical Assessment</h2>
+            </div>
+            
+            <div id="loading" class="hidden">
+                <div class="flex flex-col items-center justify-center py-12">
+                    <div class="animate-spin rounded-full h-16 w-16 border-4 border-primary border-t-transparent"></div>
+                    <p class="mt-4 text-lg text-gray-600">Processing clinical data...</p>
+                </div>
+            </div>
+
+            <div id="results" class="hidden">
+                <!-- Clinical Analysis -->
+                <div class="mb-8 bg-white rounded-xl border border-gray-200 overflow-hidden">
+                    <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-800">Clinical Analysis</h3>
+                    </div>
+                    <div id="currentAnalysis" class="p-6 space-y-4">
+                        <!-- Content will be dynamically populated -->
+                    </div>
+                </div>
+
+                <!-- Diagnostic Findings -->
+                <div class="mb-8 bg-white rounded-xl border border-gray-200 overflow-hidden">
+                    <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-800">Diagnostic Findings</h3>
+                    </div>
+                    <div id="diagnosticFindings" class="p-6 space-y-4">
+                        <!-- Content will be dynamically populated -->
+                    </div>
+                </div>
+
+                <!-- Treatment Recommendations -->
+                <div class="mb-8 bg-white rounded-xl border border-gray-200 overflow-hidden">
+                    <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-800">Treatment Recommendations</h3>
+                    </div>
+                    <div id="recommendations" class="p-6 space-y-4">
+                        <!-- Content will be dynamically populated -->
+                    </div>
+                </div>
+
+                <!-- Follow-up Plan -->
+                <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                    <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-800">Follow-up Plan</h3>
+                    </div>
+                    <div id="followUpPlan" class="p-6 space-y-4">
+                        <!-- Content will be dynamically populated -->
+                    </div>
+                </div>
+
+                <!-- Disclaimer -->
+                <div class="mt-8 p-4 bg-blue-50 rounded-lg">
+                    <p class="text-sm text-blue-800">
+                        This analysis is generated by AI and should be reviewed by a healthcare professional. It is not a substitute for professional medical advice.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('reportForm');
+    const loadingDiv = document.getElementById('loading');
+    const resultsDiv = document.getElementById('results');
+    const errorMessage = document.getElementById('error-message');
+    const successMessage = document.getElementById('success-message');
+
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Hide any existing messages
+        errorMessage.classList.add('hidden');
+        successMessage.classList.add('hidden');
+        
+        // Show loading state
+        loadingDiv.classList.remove('hidden');
+        resultsDiv.classList.add('hidden');
+        
+        try {
+            const formData = new FormData(form);
+            
+            const response = await fetch('/analyze_report', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to analyze report');
+            }
+            
+            if (data.success) {
+                displayResults(data);
+                successMessage.textContent = 'Analysis completed successfully';
+                successMessage.classList.remove('hidden');
+            }
+            
+        } catch (error) {
+            console.error('Error:', error);
+            errorMessage.textContent = error.message || 'An error occurred while analyzing the report';
+            errorMessage.classList.remove('hidden');
+            resultsDiv.classList.add('hidden');
+        } finally {
+            loadingDiv.classList.add('hidden');
+        }
+    });
+
+    function displayResults(data) {
+        const resultsDiv = document.getElementById('results');
+        const loadingDiv = document.getElementById('loading');
+        
+        try {
+            // Show results container and hide loading
+            loadingDiv.classList.add('hidden');
+            resultsDiv.classList.remove('hidden');
+
+            // Function to create a formatted section
+            function createSection(content) {
+                if (!content) return '';
+                
+                const items = content.split('\n').filter(item => item.trim());
+                return items.map(item => `
+                    <div class="flex items-start">
+                        <svg class="w-5 h-5 text-gray-400 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                        <p class="text-gray-700 flex-grow">${item}</p>
+                    </div>
+                `).join('');
+            }
+
+            // Update each section with its content
+            document.getElementById('currentAnalysis').innerHTML = createSection(data.analysis.clinical_analysis);
+            document.getElementById('diagnosticFindings').innerHTML = createSection(data.analysis.diagnostic_findings);
+            document.getElementById('recommendations').innerHTML = createSection(data.analysis.recommendations);
+            document.getElementById('followUpPlan').innerHTML = createSection(data.analysis.follow_up_plan);
+
+        } catch (error) {
+            console.error('Error displaying results:', error);
+            resultsDiv.innerHTML = '<p class="text-red-600">Error displaying analysis results. Please try again.</p>';
+        }
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}{{ topic.title }} - MenoCare Community{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <a href="{{ url_for('view_group', group_id=group_id) }}" class="text-primary hover:text-primary-dark mb-4 inline-flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            Back to {{ group.name }}
+        </a>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ topic.title }}</h1>
+        <p class="text-gray-600">{{ topic.description }}</p>
+    </div>
+
+    <!-- Main Content -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Discussion Thread -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <!-- Posts List -->
+                <div class="space-y-8" id="posts-container">
+                    {% for post in posts %}
+                    <div class="border-b pb-6 last:border-b-0 {% if post.username == 'MenoCare Team' %}bg-blue-50 -mx-6 px-6{% endif %}">
+                        <div class="flex items-start space-x-4">
+                            <div class="flex-1">
+                                <div class="flex items-center mb-2">
+                                    <span class="font-medium text-gray-900 {% if post.username == 'MenoCare Team' %}text-blue-600{% endif %}">
+                                        {{ post.username }}
+                                    </span>
+                                    <span class="mx-2 text-gray-500">•</span>
+                                    <span class="text-sm text-gray-500">{{ post.timestamp }}</span>
+                                </div>
+                                <p class="text-gray-700 whitespace-pre-line">{{ post.message }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- New Post Form -->
+                {% if is_member %}
+                <div class="mt-8 pt-6 border-t">
+                    <h3 class="text-lg font-semibold mb-4">Add a Reply</h3>
+                    <form id="post-form" class="space-y-4">
+                        <div>
+                            <textarea id="message" name="message" rows="4" 
+                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
+                                placeholder="Share your thoughts..."></textarea>
+                        </div>
+                        <div class="flex justify-end">
+                            <button type="submit" class="btn-primary">
+                                Post Reply
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                {% else %}
+                <div class="mt-8 pt-6 border-t">
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <p class="text-sm text-yellow-800">
+                            You must join the group to participate in discussions.
+                            <a href="{{ url_for('view_group', group_id=group_id) }}" class="text-primary hover:text-primary-dark font-medium">
+                                Join Group
+                            </a>
+                        </p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-xl shadow-lg p-6 sticky top-4">
+                <h2 class="text-xl font-semibold mb-4">About This Topic</h2>
+                <p class="text-gray-600 mb-6">{{ topic.description }}</p>
+                
+                {% if not is_member %}
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                    <p class="text-sm text-yellow-800">
+                        Join this group to participate in discussions and share your experiences.
+                    </p>
+                </div>
+                {% endif %}
+
+                <h3 class="font-medium text-gray-900 mb-2">Discussion Guidelines</h3>
+                <ul class="space-y-2 text-sm text-gray-600">
+                    <li>• Stay on topic</li>
+                    <li>• Be respectful of others</li>
+                    <li>• Share your experiences</li>
+                    <li>• Keep it constructive</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('post-form');
+    if (form) {
+        const postsContainer = document.getElementById('posts-container');
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const messageInput = document.getElementById('message');
+            const message = messageInput.value.trim();
+            
+            if (!message) return;
+
+            try {
+                const response = await fetch("{{ url_for('add_post', group_id=group_id, topic_id=topic_id) }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        'message': message
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Create new post element
+                    const postDiv = document.createElement('div');
+                    postDiv.className = 'border-b pb-6 last:border-b-0';
+                    postDiv.innerHTML = `
+                        <div class="flex items-start space-x-4">
+                            <div class="flex-1">
+                                <div class="flex items-center mb-2">
+                                    <span class="font-medium text-gray-900">${data.post.username}</span>
+                                    <span class="mx-2 text-gray-500">•</span>
+                                    <span class="text-sm text-gray-500">${data.post.timestamp}</span>
+                                </div>
+                                <p class="text-gray-700 whitespace-pre-line">${data.post.message}</p>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Add new post to the container
+                    postsContainer.appendChild(postDiv);
+                    
+                    // Clear the form
+                    messageInput.value = '';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
