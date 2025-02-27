@@ -1,0 +1,13 @@
+.git
+.gitignore
+.env
+*.pyc
+__pycache__
+.pytest_cache
+.coverage
+htmlcov
+venv
+.venv
+*.db
+.DS_Store
+.nixpacks
