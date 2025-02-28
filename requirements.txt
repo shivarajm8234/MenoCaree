@@ -13,7 +13,7 @@ SQLAlchemy==2.0.28
 python-dotenv==1.0.0
 
 # AI and Data Processing
-groq==0.4.2
+groq==0.18.0
 plotly==5.18.0
 
 # PDF and Image Processing
