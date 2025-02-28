@@ -44,28 +44,60 @@ def index():
 
 @menopause.route('/analyze', methods=['POST'])
 def analyze():
-    data = request.form
-    
-    # Get form data
-    age = data.get('age', type=int)
-    last_period = data.get('last_period', type=int)
-    symptoms = request.form.getlist('symptoms')
-    
-    if not all([age, last_period, symptoms]):
-        return jsonify({'error': 'Please provide all required information'}), 400
-    
-    # Store in session for reference
-    session['menopause_data'] = {
-        'age': age,
-        'last_period': last_period,
-        'symptoms': symptoms
-    }
-    
-    # Get analysis from Groq
-    analysis = get_menopause_analysis(symptoms, age, last_period)
-    
-    return render_template('menopause/results.html', 
-                         age=age,
-                         last_period=last_period,
-                         symptoms=symptoms,
-                         analysis=analysis)
+    try:
+        data = request.form
+        
+        # Get and validate form data
+        age = data.get('age', type=int)
+        last_period = data.get('last_period', type=int)
+        symptoms = request.form.getlist('symptoms')
+        other_symptoms_details = request.form.get('other_symptoms_details', '').strip()
+        
+        # Validate age
+        if not age or age < 35 or age > 65:
+            return jsonify({'error': 'Please enter a valid age between 35 and 65 years.'}), 400
+        
+        # Validate months since last period
+        if not last_period or last_period < 0 or last_period > 120:
+            return jsonify({'error': 'Please enter a valid number of months since your last period (0-120).'}), 400
+        
+        if not symptoms:
+            return jsonify({'error': 'Please select at least one symptom.'}), 400
+        
+        # Process symptoms
+        processed_symptoms = []
+        for symptom in symptoms:
+            if symptom == 'Other Symptoms' and other_symptoms_details:
+                processed_symptoms.append(f"Other Symptoms: {other_symptoms_details}")
+            else:
+                processed_symptoms.append(symptom)
+        
+        # Determine menopause stage
+        stage = 'Perimenopause'
+        if last_period >= 12:
+            stage = 'Postmenopause'
+        elif last_period < 2:
+            stage = 'Perimenopause (Early)'
+        else:
+            stage = 'Perimenopause (Late)'
+        
+        # Store in session for reference
+        session['menopause_data'] = {
+            'age': age,
+            'last_period': last_period,
+            'symptoms': processed_symptoms,
+            'stage': stage
+        }
+        
+        # Get analysis from Groq
+        analysis = get_menopause_analysis(processed_symptoms, age, last_period)
+        
+        return render_template('menopause/results.html', 
+                             age=age,
+                             last_period=last_period,
+                             symptoms=processed_symptoms,
+                             stage=stage,
+                             analysis=analysis)
+                             
+    except Exception as e:
+        return jsonify({'error': 'An error occurred while processing your information. Please try again.'}), 500

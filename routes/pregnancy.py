@@ -13,7 +13,14 @@ pregnancy = Blueprint('pregnancy', __name__)
 
 @pregnancy.route('/')
 def index():
-    return render_template('pregnancy/index.html')
+    # Calculate min and max dates directly
+    current_date = datetime.now()
+    min_date = (current_date + timedelta(days=1)).strftime('%Y-%m-%d')
+    max_date = (current_date + timedelta(days=280)).strftime('%Y-%m-%d')
+    
+    return render_template('pregnancy/index.html', 
+                         min_date=min_date,
+                         max_date=max_date)
 
 @pregnancy.route('/track', methods=['POST'])
 def track_pregnancy():

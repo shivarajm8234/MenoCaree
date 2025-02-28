@@ -1,9 +1,18 @@
 import os
 from dotenv import load_dotenv
 import groq
+import logging
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session, send_file
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.units import inch
+import io
+from bs4 import BeautifulSoup
 from database import Database
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -2727,7 +2736,7 @@ def menopause_track():
         flash(f'Error analyzing menopause data: {str(e)}', 'error')
         return redirect(url_for('menopause'))
 
-@app.route('/analyze_report', methods=['POST'])
+@app.route('/api/analyze_report', methods=['POST'])
 def analyze_report():
     try:
         if 'report' not in request.files:
@@ -2837,11 +2846,114 @@ Example format:
                 content = f"<p>{content}</p>"
             sections[key] = content.strip()
 
-        return jsonify({
-            'success': True,
-            'analysis': sections
-        })
-        
+        try:
+            # Generate PDF
+            buffer = io.BytesIO()
+            doc = SimpleDocTemplate(
+                buffer,
+                pagesize=letter,
+                rightMargin=72,
+                leftMargin=72,
+                topMargin=72,
+                bottomMargin=72
+            )
+            
+            # Create custom styles
+            styles = getSampleStyleSheet()
+            styles.add(ParagraphStyle(
+                name='CustomTitle',
+                parent=styles['Title'],
+                fontSize=24,
+                spaceAfter=30,
+                textColor=HexColor('#2c3e50')
+            ))
+            styles.add(ParagraphStyle(
+                name='CustomHeading',
+                parent=styles['Heading1'],
+                fontSize=18,
+                spaceBefore=20,
+                spaceAfter=12,
+                textColor=HexColor('#34495e')
+            ))
+            styles.add(ParagraphStyle(
+                name='CustomBody',
+                parent=styles['Normal'],
+                fontSize=12,
+                spaceBefore=6,
+                spaceAfter=6,
+                textColor=HexColor('#2c3e50')
+            ))
+            styles.add(ParagraphStyle(
+                name='CustomBullet',
+                parent=styles['Normal'],
+                fontSize=12,
+                leftIndent=20,
+                spaceBefore=3,
+                spaceAfter=3,
+                textColor=HexColor('#2c3e50')
+            ))
+            
+            story = []
+            
+            # Add title and timestamp
+            story.append(Paragraph('Health Report Analysis', styles['CustomTitle']))
+            timestamp = datetime.now().strftime('%B %d, %Y %I:%M %p')
+            story.append(Paragraph(f'Generated on {timestamp}', styles['CustomBody']))
+            story.append(Spacer(1, 20))
+            
+            # Process and add sections
+            for section_title, content in sections.items():
+                try:
+                    # Add section heading
+                    heading = section_title.replace('_', ' ').title()
+                    story.append(Paragraph(heading, styles['CustomHeading']))
+                    
+                    # Parse HTML content using BeautifulSoup
+                    soup = BeautifulSoup(content, 'html.parser')
+                    
+                    # Process each HTML element
+                    for element in soup.children:
+                        if element.name == 'p':
+                            # Process paragraphs
+                            story.append(Paragraph(element.get_text().strip(), styles['CustomBody']))
+                            story.append(Spacer(1, 6))
+                        elif element.name == 'ul':
+                            # Process bullet points
+                            for li in element.find_all('li'):
+                                bullet_text = '• ' + li.get_text().strip()
+                                story.append(Paragraph(bullet_text, styles['CustomBullet']))
+                                story.append(Spacer(1, 3))
+                    
+                    story.append(Spacer(1, 12))
+                    
+                except Exception as e:
+                    # Log the error but continue processing other sections
+                    logging.error(f'Error processing section {section_title}: {str(e)}')
+                    continue
+            
+            try:
+                # Build PDF
+                doc.build(story)
+                buffer.seek(0)
+            except Exception as e:
+                logging.error(f'Error building PDF: {str(e)}')
+                raise
+            
+            # Generate filename with timestamp
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            filename = f'health_report_{timestamp}.pdf'
+            
+            # Send file
+            return send_file(
+                buffer,
+                as_attachment=True,
+                download_name=filename,
+                mimetype='application/pdf'
+            )
+            
+        except Exception as e:
+            return jsonify({'error': f'Error generating PDF: {str(e)}'}), 500
+            
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -3014,4 +3126,4 @@ def show_hormonal_form():
     return render_template('hormonal_balance_form.html')
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True,port=5002)
