@@ -3,6 +3,7 @@ from psycopg2.extras import RealDictCursor
 import os
 from dotenv import load_dotenv
 import time
+import logging
 
 load_dotenv()
 
@@ -19,46 +20,38 @@ class Database:
         while retry_count < self.max_retries:
             try:
                 if self.connection is None or self.connection.closed:
-                    # Try internal connection first, fallback to external
+                    # Get database URL from environment variable
+                    database_url = os.getenv('DATABASE_URL', 'postgresql://postgres:uPnzIOoMWKueCNawwlhioIekzfSgtack@metro.proxy.rlwy.net:33517/railway')
+                    
                     try:
                         self.connection = psycopg2.connect(
-                            host='postgres.railway.internal',
-                            port=5432,
-                            database='railway',
-                            user='postgres',
-                            password='uPnzIOoMWKueCNawwlhioIekzfSgtack',
+                            database_url,
                             cursor_factory=RealDictCursor
                         )
-                    except psycopg2.Error:
-                        # Fallback to external connection
-                        self.connection = psycopg2.connect(
-                            host='metro.proxy.rlwy.net',
-                            port=33517,
-                            database='railway',
-                            user='postgres',
-                            password='uPnzIOoMWKueCNawwlhioIekzfSgtack',
-                            cursor_factory=RealDictCursor
-                        )
-                    self.connection = psycopg2.connect(
-                        host=os.getenv('DB_HOST', 'localhost'),
-                        user=os.getenv('DB_USER', 'postgres'),
-                        password=os.getenv('DB_PASSWORD'),
-                        database=os.getenv('DB_NAME', 'menocare'),
-                        cursor_factory=RealDictCursor
-                    )
-                    self.connection.autocommit = True
-                    # Test the connection
-                    with self.connection.cursor() as cursor:
-                        cursor.execute("SELECT 1")
-                    return
+                        self.connection.autocommit = True
+                        
+                        # Test the connection
+                        with self.connection.cursor() as cursor:
+                            cursor.execute('SELECT 1')
+                        logging.info("Successfully connected to Railway.app database")
+                        return
+                    except psycopg2.Error as e:
+                        logging.error(f"Database connection error: {str(e)}")
+                        retry_count += 1
+                        if retry_count < self.max_retries:
+                            logging.info(f"Database connection attempt {retry_count} failed. Retrying in {self.retry_delay} seconds...")
+                            time.sleep(self.retry_delay)
+                        else:
+                            logging.error("Max retries reached. Could not establish database connection.")
+                            raise
             except psycopg2.Error as e:
+                logging.error(f"Database connection error: {str(e)}")
                 retry_count += 1
-                print(f"Database connection error: {str(e)}")
                 if retry_count < self.max_retries:
-                    print(f"Database connection attempt {retry_count} failed. Retrying in {self.retry_delay} seconds...")
+                    logging.info(f"Database connection attempt {retry_count} failed. Retrying in {self.retry_delay} seconds...")
                     time.sleep(self.retry_delay)
                 else:
-                    print(f"Failed to connect to database after {self.max_retries} attempts: {str(e)}")
+                    logging.error("Max retries reached. Could not establish database connection.")
                     raise
 
     def execute_query(self, query, params=None):

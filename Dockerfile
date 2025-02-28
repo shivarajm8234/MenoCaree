@@ -39,4 +39,4 @@ RUN mkdir -p instance && chmod 777 instance
 EXPOSE 8000
 
 # Command to run the application with proper worker configuration
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "--timeout", "120", "app:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "2", "--timeout", "300", "app:app"]
