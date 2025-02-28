@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import groq
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session, send_file
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
 from database import Database
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -3013,5 +3014,4 @@ def show_hormonal_form():
     return render_template('hormonal_balance_form.html')
 
 if __name__ == '__main__':
-    port = int(os.getenv('PORT', 8000))
-    app.run(host='0.0.0.0', port=port)
+    app.run()

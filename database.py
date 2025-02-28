@@ -101,16 +101,23 @@ class Database:
 
     def create_tables(self):
         try:
+            # First, check and upgrade users table if needed
+            self.upgrade_users_table()
+            
             # Create tables for hormonal balance tracking
-            queries = [
-                """
-                CREATE TABLE IF NOT EXISTS users (
+            # First ensure users table is properly created
+            self.execute_query("""
+                DROP TABLE IF EXISTS users CASCADE;
+                CREATE TABLE users (
                     id SERIAL PRIMARY KEY,
                     username VARCHAR(100) UNIQUE NOT NULL,
                     email VARCHAR(255) UNIQUE NOT NULL,
+                    password_hash VARCHAR(255) NOT NULL,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
-                """,
+            """)
+            
+            queries = [
                 """
                 CREATE TABLE IF NOT EXISTS mood_tracker (
                     id SERIAL PRIMARY KEY,
@@ -167,6 +174,25 @@ class Database:
             print("Successfully created all required tables")
         except psycopg2.Error as e:
             print(f"Error creating tables: {str(e)}")
+            raise
+
+    def upgrade_users_table(self):
+        try:
+            # Check if password_hash column exists
+            check_query = """
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name = 'users' AND column_name = 'password_hash';
+            """
+            result = self.fetch_all(check_query)
+            
+            if not result:
+                # Add password_hash column if it doesn't exist
+                alter_query = "ALTER TABLE users ADD COLUMN password_hash VARCHAR(255) NOT NULL DEFAULT '';"
+                self.execute_query(alter_query)
+                logging.info("Added password_hash column to users table")
+        except psycopg2.Error as e:
+            logging.error(f"Error upgrading users table: {str(e)}")
             raise
 
     def close(self):
