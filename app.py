@@ -3013,4 +3013,5 @@ def show_hormonal_form():
     return render_template('hormonal_balance_form.html')
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5097)
+    port = int(os.getenv('PORT', 8000))
+    app.run(host='0.0.0.0', port=port)
