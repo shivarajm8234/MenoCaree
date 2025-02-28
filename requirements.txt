@@ -8,7 +8,7 @@ Werkzeug==3.0.1
 groq==0.4.2
 plotly==5.18.0
 requests==2.31.0
-alabaster @ file:///croot/alabaster_1718201490751/work
+alabaster==0.7.16
 alembic==1.14.1
 altair @ file:///work/perseverance-python-buildout/croot/altair_1698866618831/work
 altgraph==0.17.4
