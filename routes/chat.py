@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, request
 from flask_login import login_required
 import os
 from groq import Groq
-from googletrans import Translator
+from translate import Translator
 
 chat_bp = Blueprint('chat', __name__)
 
@@ -11,8 +11,9 @@ client = Groq(
     api_key=os.environ.get('GROQ_API_KEY')
 )
 
-# Initialize Google Translator
-translator = Translator()
+# Function to get translator for a specific language
+def get_translator(to_lang):
+    return Translator(to_lang=to_lang)
 
 # Language codes for translation
 LANGUAGE_CODES = {
@@ -40,8 +41,11 @@ def chat():
         
         # If message is not in English, translate it to English for the AI
         if target_lang != 'en':
-            translated_message = translator.translate(message, src=target_lang, dest='en')
-            message = translated_message.text
+            translator = get_translator('en')
+            try:
+                message = translator.translate(message)
+            except Exception as e:
+                print(f"Translation error (to English): {str(e)}")
 
         # Create chat completion with Groq
         chat_completion = client.chat.completions.create(
@@ -67,8 +71,11 @@ def chat():
 
         # If target language is not English, translate the response
         if target_lang != 'en':
-            translated_response = translator.translate(response, src='en', dest=target_lang)
-            response = translated_response.text
+            translator = get_translator(target_lang)
+            try:
+                response = translator.translate(response)
+            except Exception as e:
+                print(f"Translation error (from English): {str(e)}")
 
         return jsonify({
             'response': response,
@@ -80,9 +87,10 @@ def chat():
         error_message = "Sorry, there was an error processing your message. Please try again."
         if target_lang != 'en':
             try:
-                translated_error = translator.translate(error_message, src='en', dest=target_lang)
-                error_message = translated_error.text
-            except:
+                translator = get_translator(target_lang)
+                error_message = translator.translate(error_message)
+            except Exception as e:
+                print(f"Translation error (error message): {str(e)}")
                 pass  # If translation fails, use English error message
                 
         return jsonify({
