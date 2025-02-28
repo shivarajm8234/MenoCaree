@@ -23,6 +23,7 @@ PyPDF2==3.0.1
 pytesseract==0.3.10
 PyMuPDF==1.23.26
 pdfkit==1.0.0
+beautifulsoup4==4.12.3
 
 # HTTP and Security
 requests==2.31.0
