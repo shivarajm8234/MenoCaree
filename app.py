@@ -43,7 +43,10 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'default-secret-key')
 app.config['UPLOAD_FOLDER'] = 'uploads'
 
 # Initialize Groq client with API key from environment
-groq_client = groq.Client(api_key=os.getenv('GROQ_API_KEY'))
+groq_api_key = os.getenv('GROQ_API_KEY')
+if not groq_api_key:
+    raise ValueError('GROQ_API_KEY environment variable is not set')
+groq_client = groq.Client(api_key=groq_api_key)
 
 # Register blueprints
 from routes.period_health import period_health
