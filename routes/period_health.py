@@ -56,95 +56,95 @@ def generate_pdf_report(analysis_text, report_data):
             <meta charset="UTF-8">
             <title>MenoCare Professional Health Report</title>
             <style>
-                body {{{{  /* Double curly braces to escape in f-string */
+                body {{
                     font-family: 'Arial', sans-serif;
                     line-height: 1.6;
                     color: #333;
                     margin: 0;
                     padding: 0;
-                }}}}
-                .container {{{{
+                }}
+                .container {{
                     max-width: 1000px;
                     margin: 0 auto;
                     padding: 20px;
-                }}}}
-                .header {{{{
+                }}
+                .header {{
                     background: linear-gradient(135deg, #2c5282 0%, #1a365d 100%);
                     color: white;
                     padding: 30px;
                     border-radius: 10px 10px 0 0;
                     margin-bottom: 30px;
-                }}}}
-                .patient-info {{{{
+                }}
+                .patient-info {{
                     background: rgba(255, 255, 255, 0.1);
                     padding: 15px;
                     border-radius: 5px;
                     margin-top: 15px;
-                }}}}
-                .report-info {{{{
+                }}
+                .report-info {{
                     background: #f8fafc;
                     padding: 15px;
                     border-radius: 5px;
                     margin: 20px 0;
                     border: 1px solid #e2e8f0;
-                }}}}
-                .section {{{{
+                }}
+                .section {{
                     background: white;
                     padding: 25px;
                     margin: 20px 0;
                     border-radius: 8px;
                     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-                }}}}
-                h1 {{{{
+                }}
+                h1 {{
                     font-size: 28px;
                     margin: 0;
                     padding-bottom: 10px;
                     border-bottom: 2px solid rgba(255, 255, 255, 0.3);
-                }}}}
-                h2 {{{{
+                }}
+                h2 {{
                     color: #2c5282;
                     font-size: 22px;
                     margin-top: 0;
                     padding-bottom: 10px;
                     border-bottom: 2px solid #e2e8f0;
-                }}}}
-                .meta-info {{{{
+                }}
+                .meta-info {{
                     color: rgba(255, 255, 255, 0.9);
                     margin-top: 10px;
                     font-size: 14px;
-                }}}}
-                table {{{{
+                }}
+                table {{
                     width: 100%;
                     border-collapse: collapse;
                     margin: 15px 0;
-                }}}}
-                th, td {{{{
+                }}
+                th, td {{
                     padding: 12px;
                     text-align: left;
                     border-bottom: 1px solid #e2e8f0;
-                }}}}
-                th {{{{
+                }}
+                th {{
                     background-color: #f8fafc;
                     color: #2c5282;
                     font-weight: 600;
-                }}}}
-                ul {{{{
+                }}
+                ul {{
                     margin: 10px 0;
                     padding-left: 20px;
-                }}}}
-                li {{{{
+                }}
+                li {{
                     margin: 8px 0;
                     line-height: 1.5;
-                }}}}
-                .footer {{{{
+                }}
+                .footer {{
                     text-align: center;
                     margin-top: 40px;
                     padding-top: 20px;
                     border-top: 2px solid #e2e8f0;
                     color: #666;
                     font-size: 14px;
-                }}}}
-                .disclaimer {{{{
+                }}
+                .disclaimer {{
                     background: #fff5f5;
                     border: 1px solid #feb2b2;
                     padding: 15px;
@@ -152,19 +152,34 @@ def generate_pdf_report(analysis_text, report_data):
                     margin: 20px 0;
                     font-size: 14px;
                     color: #c53030;
-                }}}}
-                .logo {{{{
+                }}
+                .logo {{
                     text-align: right;
                     margin-bottom: 10px;
-                }}}}
-                .watermark {{{{
+                }}
+                .watermark {{
                     position: fixed;
                     bottom: 0;
                     right: 0;
                     opacity: 0.1;
                     z-index: -1;
                     font-size: 12px;
-                }}}}
+                }}
+                .report-container {{
+                    font-family: 'Arial', sans-serif;
+                    line-height: 1.6;
+                    color: #333;
+                }}
+                .chart-container {{
+                    margin: 20px 0;
+                    padding: 15px;
+                    background-color: #f8f9fa;
+                    border-radius: 8px;
+                }}
+                .symptom-list {{
+                    list-style-type: none;
+                    padding-left: 0;
+                }}
             </style>
         </head>
         <body>
@@ -227,28 +242,28 @@ def generate_pdf_report(analysis_text, report_data):
                         <tr>
                             <th>Condition</th>
                         </tr>
-                        {''.join(f'<tr><td>{condition}</td></tr>' for condition in medical_conditions) if medical_conditions else '<tr><td>No medical conditions reported</td></tr>'}
+                        {{''.join(f'<tr><td>{condition}</td></tr>' for condition in medical_conditions) if medical_conditions else '<tr><td>No medical conditions reported</td></tr>'}}
                     </table>
                 </div>
 
                 <div class="section">
                     <h2>Professional Analysis</h2>
-                    {analysis_text.replace('\n', '<br>')}
+                    {{analysis_text.replace('\n', '<br>')}}
                 </div>
 
                 <div class="disclaimer">
                     <strong>Medical Disclaimer:</strong>
-                    <p>This report is generated based on the information provided and should be used for informational purposes only. It is not intended to be a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition.</p>
+                    <p>This report is generated based on the information provided and should be used for informational purposes only. It is not intended to be a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition.</p>ions you may have regarding a medical condition.</p>
                 </div>
 
                 <div class="footer">
                     <p>MenoCare Professional Health Report</p>
-                    <p>Report ID: {report_id} | Generated: {current_date.strftime('%Y-%m-%d %H:%M:%S')}</p>
-                    <p> {current_date.year} MenoCare. All rights reserved.</p>
+                    <p>Report ID: {{report_id}} | Generated: {{current_date.strftime('%Y-%m-%d %H:%M:%S')}}</p>
+                    <p>{{current_date.year}} MenoCare. All rights reserved.</p>
                 </div>
 
                 <div class="watermark">
-                    MenoCare Report {report_id} | {current_date.strftime('%Y-%m-%d')}
+                    MenoCare Report {{report_id}} | {{current_date.strftime('%Y-%m-%d')}}
                 </div>
             </div>
         </body>
