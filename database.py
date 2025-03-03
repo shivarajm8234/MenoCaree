@@ -3,7 +3,6 @@ from psycopg2.extras import RealDictCursor
 import os
 from dotenv import load_dotenv
 import time
-import logging
 
 load_dotenv()
 
@@ -20,38 +19,26 @@ class Database:
         while retry_count < self.max_retries:
             try:
                 if self.connection is None or self.connection.closed:
-                    # Get database URL from environment variable
-                    database_url = os.getenv('DATABASE_URL', 'postgresql://postgres:uPnzIOoMWKueCNawwlhioIekzfSgtack@metro.proxy.rlwy.net:33517/railway')
-                    
-                    try:
-                        self.connection = psycopg2.connect(
-                            database_url,
-                            cursor_factory=RealDictCursor
-                        )
-                        self.connection.autocommit = True
-                        
-                        # Test the connection
-                        with self.connection.cursor() as cursor:
-                            cursor.execute('SELECT 1')
-                        logging.info("Successfully connected to Railway.app database")
-                        return
-                    except psycopg2.Error as e:
-                        logging.error(f"Database connection error: {str(e)}")
-                        retry_count += 1
-                        if retry_count < self.max_retries:
-                            logging.info(f"Database connection attempt {retry_count} failed. Retrying in {self.retry_delay} seconds...")
-                            time.sleep(self.retry_delay)
-                        else:
-                            logging.error("Max retries reached. Could not establish database connection.")
-                            raise
+                    self.connection = psycopg2.connect(
+                        host=os.getenv('DB_HOST', 'localhost'),
+                        user=os.getenv('DB_USER', 'postgres'),
+                        password=os.getenv('DB_PASSWORD'),
+                        database=os.getenv('DB_NAME', 'menocare'),
+                        cursor_factory=RealDictCursor
+                    )
+                    self.connection.autocommit = True
+                    # Test the connection
+                    with self.connection.cursor() as cursor:
+                        cursor.execute("SELECT 1")
+                    return
             except psycopg2.Error as e:
-                logging.error(f"Database connection error: {str(e)}")
                 retry_count += 1
+                print(f"Database connection error: {str(e)}")
                 if retry_count < self.max_retries:
-                    logging.info(f"Database connection attempt {retry_count} failed. Retrying in {self.retry_delay} seconds...")
+                    print(f"Database connection attempt {retry_count} failed. Retrying in {self.retry_delay} seconds...")
                     time.sleep(self.retry_delay)
                 else:
-                    logging.error("Max retries reached. Could not establish database connection.")
+                    print(f"Failed to connect to database after {self.max_retries} attempts: {str(e)}")
                     raise
 
     def execute_query(self, query, params=None):
@@ -101,23 +88,16 @@ class Database:
 
     def create_tables(self):
         try:
-            # First, check and upgrade users table if needed
-            self.upgrade_users_table()
-            
             # Create tables for hormonal balance tracking
-            # First ensure users table is properly created
-            self.execute_query("""
-                DROP TABLE IF EXISTS users CASCADE;
-                CREATE TABLE users (
+            queries = [
+                """
+                CREATE TABLE IF NOT EXISTS users (
                     id SERIAL PRIMARY KEY,
                     username VARCHAR(100) UNIQUE NOT NULL,
                     email VARCHAR(255) UNIQUE NOT NULL,
-                    password_hash VARCHAR(255) NOT NULL,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
-            """)
-            
-            queries = [
+                """,
                 """
                 CREATE TABLE IF NOT EXISTS mood_tracker (
                     id SERIAL PRIMARY KEY,
@@ -174,25 +154,6 @@ class Database:
             print("Successfully created all required tables")
         except psycopg2.Error as e:
             print(f"Error creating tables: {str(e)}")
-            raise
-
-    def upgrade_users_table(self):
-        try:
-            # Check if password_hash column exists
-            check_query = """
-            SELECT column_name 
-            FROM information_schema.columns 
-            WHERE table_name = 'users' AND column_name = 'password_hash';
-            """
-            result = self.fetch_all(check_query)
-            
-            if not result:
-                # Add password_hash column if it doesn't exist
-                alter_query = "ALTER TABLE users ADD COLUMN password_hash VARCHAR(255) NOT NULL DEFAULT '';"
-                self.execute_query(alter_query)
-                logging.info("Added password_hash column to users table")
-        except psycopg2.Error as e:
-            logging.error(f"Error upgrading users table: {str(e)}")
             raise
 
     def close(self):

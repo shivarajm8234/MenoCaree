@@ -165,21 +165,6 @@ def generate_pdf_report(analysis_text, report_data):
                     z-index: -1;
                     font-size: 12px;
                 }}
-                .report-container {{
-                    font-family: 'Arial', sans-serif;
-                    line-height: 1.6;
-                    color: #333;
-                }}
-                .chart-container {{
-                    margin: 20px 0;
-                    padding: 15px;
-                    background-color: #f8f9fa;
-                    border-radius: 8px;
-                }}
-                .symptom-list {{
-                    list-style-type: none;
-                    padding-left: 0;
-                }}
             </style>
         </head>
         <body>
@@ -242,28 +227,28 @@ def generate_pdf_report(analysis_text, report_data):
                         <tr>
                             <th>Condition</th>
                         </tr>
-                        {{''.join(f'<tr><td>{condition}</td></tr>' for condition in medical_conditions) if medical_conditions else '<tr><td>No medical conditions reported</td></tr>'}}
+                        {''.join(f'<tr><td>{condition}</td></tr>' for condition in medical_conditions) if medical_conditions else '<tr><td>No medical conditions reported</td></tr>'}
                     </table>
                 </div>
 
                 <div class="section">
                     <h2>Professional Analysis</h2>
-                    {{analysis_text.replace('\n', '<br>')}}
+                    {analysis_text.replace('\n', '<br>')}
                 </div>
 
                 <div class="disclaimer">
                     <strong>Medical Disclaimer:</strong>
-                    <p>This report is generated based on the information provided and should be used for informational purposes only. It is not intended to be a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition.</p>ions you may have regarding a medical condition.</p>
+                    <p>This report is generated based on the information provided and should be used for informational purposes only. It is not intended to be a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition.</p>
                 </div>
 
                 <div class="footer">
                     <p>MenoCare Professional Health Report</p>
-                    <p>Report ID: {{report_id}} | Generated: {{current_date.strftime('%Y-%m-%d %H:%M:%S')}}</p>
-                    <p>{{current_date.year}} MenoCare. All rights reserved.</p>
+                    <p>Report ID: {report_id} | Generated: {current_date.strftime('%Y-%m-%d %H:%M:%S')}</p>
+                    <p> {current_date.year} MenoCare. All rights reserved.</p>
                 </div>
 
                 <div class="watermark">
-                    MenoCare Report {{report_id}} | {{current_date.strftime('%Y-%m-%d')}}
+                    MenoCare Report {report_id} | {current_date.strftime('%Y-%m-%d')}
                 </div>
             </div>
         </body>

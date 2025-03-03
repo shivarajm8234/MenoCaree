@@ -1,0 +1,57 @@
+@startuml MenoCare Use Case Diagram
+
+skinparam actorStyle awesome
+skinparam usecase {
+    BackgroundColor #EEEBDC
+    BorderColor #000000
+    ArrowColor #000000
+}
+
+' Actors
+actor "User" as user
+actor "Healthcare Provider" as doctor
+actor "Community Member" as member
+
+rectangle MenoCare {
+    ' Menopause Related Use Cases
+    usecase "Track Menopause Symptoms" as UC1
+    usecase "View Menopause Results" as UC2
+    usecase "Get Personalized Recommendations" as UC3
+
+    ' Pregnancy Related Use Cases
+    usecase "Track Pregnancy Progress" as UC4
+    usecase "View Pregnancy Report" as UC5
+    usecase "Get Pregnancy Guidelines" as UC6
+
+    ' Community Features
+    usecase "Join Community Discussion" as UC7
+    usecase "Share Experiences" as UC8
+    usecase "Provide Support" as UC9
+
+    ' Healthcare Provider Features
+    usecase "Review Patient Data" as UC10
+    usecase "Provide Medical Advice" as UC11
+}
+
+' Relationships
+user --> UC1
+user --> UC2
+user --> UC3
+user --> UC4
+user --> UC5
+user --> UC6
+
+member --> UC7
+member --> UC8
+member --> UC9
+
+doctor --> UC10
+doctor --> UC11
+
+UC2 ..> UC3 : <<include>>
+UC5 ..> UC6 : <<include>>
+UC7 ..> UC8 : <<extends>>
+UC8 ..> UC9 : <<extends>>
+UC10 ..> UC11 : <<include>>
+
+@enduml

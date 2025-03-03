@@ -48,43 +48,23 @@
                             <div class="space-y-2">
                                 <label for="age" class="block text-sm font-medium text-gray-700">Your Age</label>
                                 <div class="relative">
-                                    <input type="number" 
-                                           id="age" 
-                                           name="age" 
-                                           required 
-                                           min="35" 
-                                           max="65"
-                                           step="1"
-                                           placeholder="Enter age (35-65)"
-                                           title="Please enter your age between 35 and 65 years"
-                                           oninput="this.value = Math.round(this.value); if(this.value > 65) this.value = 65; if(this.value < 35) this.value = 35;"
+                                    <input type="number" id="age" name="age" required min="35" max="65"
                                            class="mt-1 block w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent">
                                     <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                                         <span class="text-gray-500">years</span>
                                     </div>
                                 </div>
-                                <p class="mt-1 text-sm text-gray-500">Age must be between 35 and 65 years</p>
                             </div>
 
                             <div class="space-y-2">
                                 <label for="last_period" class="block text-sm font-medium text-gray-700">Months Since Last Period</label>
                                 <div class="relative">
-                                    <input type="number" 
-                                           id="last_period" 
-                                           name="last_period" 
-                                           required 
-                                           min="0" 
-                                           max="120"
-                                           step="1"
-                                           placeholder="Enter months (0-120)"
-                                           title="Please enter the number of months since your last period (0-120)"
-                                           oninput="this.value = Math.round(this.value); if(this.value > 120) this.value = 120; if(this.value < 0) this.value = 0;"
+                                    <input type="number" id="last_period" name="last_period" required min="0"
                                            class="mt-1 block w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent">
                                     <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                                         <span class="text-gray-500">months</span>
                                     </div>
                                 </div>
-                                <p class="mt-1 text-sm text-gray-500">Enter number of months since your last menstrual period (0-120)</p>
                             </div>
                         </div>
                     </div>
@@ -128,28 +108,9 @@
                                 <input type="checkbox" id="memory_problems" name="symptoms" value="Memory Problems" class="h-4 w-4 text-purple-500">
                                 <label for="memory_problems" class="ml-2 text-gray-700">Memory Problems</label>
                             </div>
-                            <div class="bg-white rounded-lg p-4 border border-gray-200 hover:border-purple-300 transition-colors col-span-full">
-                                <div class="flex items-center mb-2">
-                                    <input type="checkbox" 
-                                           id="other_symptoms" 
-                                           name="symptoms" 
-                                           value="Other Symptoms" 
-                                           class="h-4 w-4 text-purple-500"
-                                           onchange="document.getElementById('other_symptoms_text').disabled = !this.checked; if(!this.checked) document.getElementById('other_symptoms_text').value = '';">
-                                    <label for="other_symptoms" class="ml-2 text-gray-700">Other Symptoms</label>
-                                </div>
-                                <textarea id="other_symptoms_text" 
-                                          name="other_symptoms_details" 
-                                          rows="3"
-                                          maxlength="500"
-                                          placeholder="Please describe any other symptoms you are experiencing..."
-                                          disabled
-                                          class="mt-1 block w-full px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500"
-                                          onkeyup="document.getElementById('char_count').textContent = this.value.length + '/500';"></textarea>
-                                <div class="mt-1 text-sm text-gray-500 flex justify-between">
-                                    <span>Describe any other symptoms you're experiencing</span>
-                                    <span id="char_count">0/500</span>
-                                </div>
+                            <div class="bg-white rounded-lg p-4 border border-gray-200 hover:border-purple-300 transition-colors">
+                                <input type="checkbox" id="other_symptoms" name="symptoms" value="Other Symptoms" class="h-4 w-4 text-purple-500">
+                                <label for="other_symptoms" class="ml-2 text-gray-700">Other Symptoms</label>
                             </div>
                         </div>
                     </div>
