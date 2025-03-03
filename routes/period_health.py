@@ -2,7 +2,12 @@ from flask import Blueprint, render_template, request, jsonify, send_file
 import os
 from groq import Groq
 from dotenv import load_dotenv
-import pdfkit
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
 import io
 import uuid
 import logging
@@ -279,27 +284,101 @@ def generate_pdf_report(analysis_text, report_data):
             date=current_date.strftime('%Y-%m-%d')
         )
 
-        # Configure pdfkit options
-        options = {
-            'page-size': 'A4',
-            'margin-top': '0.75in',
-            'margin-right': '0.75in',
-            'margin-bottom': '0.75in',
-            'margin-left': '0.75in',
-            'encoding': 'UTF-8',
-            'no-outline': None,
-            'enable-local-file-access': None,
-            'footer-right': f'[page] of [topage]',
-            'footer-font-size': '8',
-            'header-font-size': '8',
-            'header-right': f'Report ID: {report_id}',
-            'header-spacing': '5'
-        }
-
-        # Generate PDF
+        # Create PDF using reportlab
         try:
-            pdf = pdfkit.from_string(html_content, False, options=options)
             filename = f"MenoCare_Professional_Report_{current_date.strftime('%Y%m%d')}_{report_id}.pdf"
+            buffer = io.BytesIO()
+            doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=72)
+            story = []
+            styles = getSampleStyleSheet()
+            title_style = ParagraphStyle(
+                'CustomTitle',
+                parent=styles['Heading1'],
+                fontSize=24,
+                spaceAfter=30
+            )
+            
+            # Add title
+            story.append(Paragraph('MenoCare Professional Health Report', title_style))
+            story.append(Spacer(1, 12))
+            
+            # Add report info
+            report_info = f"Report ID: {report_id}<br/>Generated on: {current_date.strftime('%B %d, %Y at %I:%M %p')}"
+            story.append(Paragraph(report_info, styles['Normal']))
+            story.append(Spacer(1, 12))
+            
+            # Add patient info
+            patient_data = [
+                ['Patient Information', ''],
+                ['Patient ID', patient_id],
+                ['Patient Name', patient_name],
+                ['Age', report_data.get('age', 'Not provided')],
+                ['Last Period', report_data.get('lastPeriodDate', 'Not provided')],
+                ['Cycle Length', report_data.get('cycleLength', 'Not provided')],
+                ['Flow Intensity', report_data.get('flowIntensity', 'Not provided')],
+                ['Cycle Regularity', report_data.get('cycleRegularity', 'Not provided')]
+            ]
+            
+            t = Table(patient_data, colWidths=[200, 300])
+            t.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 14),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+                ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 1), (-1, -1), 12),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black)
+            ]))
+            story.append(t)
+            story.append(Spacer(1, 20))
+            
+            # Add symptoms
+            story.append(Paragraph('Reported Symptoms', styles['Heading2']))
+            if symptoms:
+                symptoms_list = ''.join([f"<li>{symptom}</li>" for symptom in symptoms])
+                story.append(Paragraph(f"<ul>{symptoms_list}</ul>", styles['Normal']))
+            else:
+                story.append(Paragraph('No symptoms reported', styles['Normal']))
+            story.append(Spacer(1, 20))
+            
+            # Add medical conditions
+            story.append(Paragraph('Medical History', styles['Heading2']))
+            if medical_conditions:
+                conditions_list = ''.join([f"<li>{condition}</li>" for condition in medical_conditions])
+                story.append(Paragraph(f"<ul>{conditions_list}</ul>", styles['Normal']))
+            else:
+                story.append(Paragraph('No medical conditions reported', styles['Normal']))
+            story.append(Spacer(1, 20))
+            
+            # Add analysis
+            story.append(Paragraph('Professional Analysis', styles['Heading2']))
+            story.append(Paragraph(analysis_text.replace('\n', '<br/>'), styles['Normal']))
+            story.append(Spacer(1, 20))
+            
+            # Add disclaimer
+            disclaimer_style = ParagraphStyle(
+                'Disclaimer',
+                parent=styles['Normal'],
+                fontSize=10,
+                textColor=colors.red
+            )
+            story.append(Paragraph('Medical Disclaimer:', disclaimer_style))
+            story.append(Paragraph(
+                'This report is generated based on the information provided and should be used for informational purposes only. '
+                'It is not intended to be a substitute for professional medical advice, diagnosis, or treatment. '
+                'Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition.',
+                disclaimer_style
+            ))
+            
+            # Build PDF
+            doc.build(story)
+            pdf = buffer.getvalue()
+            buffer.close()
+            
             logging.info("PDF report generated successfully")
             return pdf, filename
         except Exception as pdf_error:
