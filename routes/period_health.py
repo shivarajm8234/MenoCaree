@@ -31,13 +31,12 @@ if not groq_api_key:
     raise ValueError("GROQ_API_KEY environment variable is not set")
 
 try:
-    groq_client = Groq(
-        api_key=groq_api_key
-    )
+    groq_client = Groq(api_key=groq_api_key)
     logging.info("Groq client initialized successfully")
 except Exception as e:
     logging.error("Failed to initialize Groq client: %s", str(e))
-    raise
+    # Make client None instead of raising to allow app to run without Groq
+    groq_client = None
 
 def generate_pdf_report(analysis_text, report_data):
     try:
