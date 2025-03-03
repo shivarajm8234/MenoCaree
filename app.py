@@ -46,7 +46,7 @@ app.config['UPLOAD_FOLDER'] = 'uploads'
 try:
     groq_api_key = os.getenv('GROQ_API_KEY')
     if groq_api_key:
-        groq_client = groq.Client(api_key=groq_api_key)
+        groq_client = groq.Groq(api_key=groq_api_key)
     else:
         print('Warning: GROQ_API_KEY not found in environment variables')
         groq_client = None
@@ -3012,4 +3012,4 @@ def show_hormonal_form():
     return render_template('hormonal_balance_form.html')
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5097)
+    app.run(debug=True, port=5098)

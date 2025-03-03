@@ -1,13 +1,16 @@
+import logging
 from flask import Blueprint, send_file, session, redirect, url_for, flash, current_app, g, request, render_template
 from io import BytesIO
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import wraps
 import sqlite3
 import groq
 import os
-from datetime import timedelta
+
+# Set up logging
+logging.basicConfig(level=logging.DEBUG)
 
 pregnancy = Blueprint('pregnancy', __name__)
 
@@ -53,7 +56,12 @@ def tracking_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-groq_client = groq.Client(api_key=os.getenv('GROQ_API_KEY'))
+try:
+    groq_client = groq.Groq(api_key=os.getenv('GROQ_API_KEY'))
+    logging.info("Groq client initialized successfully in pregnancy.py")
+except Exception as e:
+    logging.error("Failed to initialize Groq client in pregnancy.py: %s", str(e))
+    groq_client = None
 
 @pregnancy.route('/pregnancy/generate_medical_report', methods=['POST'])
 def generate_medical_report():

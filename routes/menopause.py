@@ -1,9 +1,18 @@
 from flask import Blueprint, render_template, request, jsonify, session
 import groq
 import os
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.DEBUG)
 
 menopause = Blueprint('menopause', __name__)
-groq_client = groq.Client(api_key=os.getenv('GROQ_API_KEY'))
+try:
+    groq_client = groq.Groq(api_key=os.getenv('GROQ_API_KEY'))
+    logging.info("Groq client initialized successfully in menopause.py")
+except Exception as e:
+    logging.error("Failed to initialize Groq client in menopause.py: %s", str(e))
+    groq_client = None
 
 def get_menopause_analysis(symptoms, age, last_period):
     prompt = f"""Analyze the following menopause-related information and provide detailed insights:

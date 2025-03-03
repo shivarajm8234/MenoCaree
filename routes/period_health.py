@@ -35,7 +35,6 @@ try:
     logging.info("Groq client initialized successfully")
 except Exception as e:
     logging.error("Failed to initialize Groq client: %s", str(e))
-    # Make client None instead of raising to allow app to run without Groq
     groq_client = None
 
 def generate_pdf_report(analysis_text, report_data):

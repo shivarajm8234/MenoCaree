@@ -1,15 +1,22 @@
 from flask import Blueprint, jsonify, request
 from flask_login import login_required
 import os
+import logging
 from groq import Groq
 from googletrans import Translator
+
+# Set up logging
+logging.basicConfig(level=logging.DEBUG)
 
 chat_bp = Blueprint('chat', __name__)
 
 # Initialize Groq client
-client = Groq(
-    api_key=os.environ.get('GROQ_API_KEY')
-)
+try:
+    client = Groq(api_key=os.environ.get('GROQ_API_KEY'))
+    logging.info("Groq client initialized successfully in chat.py")
+except Exception as e:
+    logging.error("Failed to initialize Groq client in chat.py: %s", str(e))
+    client = None
 
 # Initialize Google Translator
 translator = Translator()
@@ -31,6 +38,14 @@ LANGUAGE_CODES = {
 @login_required
 def chat():
     try:
+        # Verify Groq client is initialized
+        if not client:
+            error_message = "Chat service is temporarily unavailable. Please try again later."
+            return jsonify({
+                'response': None,
+                'error': error_message
+            }), 503
+
         data = request.get_json()
         message = data.get('message', '')
         language_code = data.get('language', 'en-US')
