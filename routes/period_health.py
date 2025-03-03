@@ -252,8 +252,7 @@ def generate_pdf_report(analysis_text, report_data):
                 </div>
             </div>
         </body>
-        </html>
-        """
+        </html>""".format(report_id=report_id, current_date=current_date)
 
         # Configure pdfkit options
         options = {
