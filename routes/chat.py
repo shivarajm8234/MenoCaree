@@ -17,8 +17,6 @@ try:
 except Exception as e:
     logging.error("Failed to initialize Groq client in chat.py: %s", str(e))
     client = None
-translator = Translator()
-
 # Language codes for translation
 LANGUAGE_CODES = {
     'en-US': 'en',  # English
