@@ -19,23 +19,18 @@ logging.basicConfig(level=logging.DEBUG)
 
 period_health = Blueprint('period_health', __name__)
 
+# Initialize Groq client
+try:
+    groq_client = Groq(api_key=os.getenv('GROQ_API_KEY'))
+    logging.info("Groq client initialized successfully in period_health.py")
+except Exception as e:
+    logging.error("Failed to initialize Groq client in period_health.py: %s", str(e))
+    groq_client = None
+
 # Load environment variables
 load_dotenv()
 
-# Initialize Groq client
-groq_api_key = os.getenv('GROQ_API_KEY')
-logging.debug("GROQ_API_KEY found: %s", bool(groq_api_key))
-
-if not groq_api_key:
-    logging.error("GROQ_API_KEY environment variable is not set")
-    raise ValueError("GROQ_API_KEY environment variable is not set")
-
-try:
-    groq_client = Groq(api_key=groq_api_key)
-    logging.info("Groq client initialized successfully")
-except Exception as e:
-    logging.error("Failed to initialize Groq client: %s", str(e))
-    groq_client = None
+# Groq client initialization moved to top of file
 
 def generate_pdf_report(analysis_text, report_data):
     try:
@@ -175,11 +170,11 @@ def health_report():
 def analyze_report():
     try:
         # Verify Groq client is initialized
-        if not groq_api_key:
-            logging.error("GROQ_API_KEY not found")
+        if not groq_client:
+            logging.error("Groq client not initialized")
             return jsonify({
                 'success': False,
-                'error': "API key not configured. Please check your environment variables."
+                'error': "Groq client not initialized. Please check your environment variables and logs."
             }), 500
 
         # Get JSON data
@@ -306,11 +301,11 @@ Please format the response in clear paragraphs.'''
 
     try:
         # Verify Groq client is initialized
-        if not groq_api_key:
-            logging.error("GROQ_API_KEY not found")
+        if not groq_client:
+            logging.error("Groq client not initialized")
             return jsonify({
                 'success': False,
-                'error': "API key not configured. Please check your environment variables."
+                'error': "Groq client not initialized. Please check your environment variables and logs."
             }), 500
 
         # Get JSON data
@@ -507,11 +502,11 @@ def download_report_get(filename):
 def analyze_symptoms():
     try:
         # Verify Groq client is initialized
-        if not groq_api_key:
-            logging.error("GROQ_API_KEY not found")
+        if not groq_client:
+            logging.error("Groq client not initialized")
             return jsonify({
                 'success': False,
-                'error': "API key not configured. Please check your environment variables."
+                'error': "Groq client not initialized. Please check your environment variables and logs."
             }), 500
 
         data = request.json
