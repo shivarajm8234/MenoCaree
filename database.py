@@ -19,6 +19,15 @@ class Database:
         while retry_count < self.max_retries:
             try:
                 if self.connection is None or self.connection.closed:
+                    # Try DATABASE_URL first (for cloud deployment)
+                database_url = os.getenv('DATABASE_URL')
+                if database_url:
+                    self.connection = psycopg2.connect(
+                        database_url,
+                        cursor_factory=RealDictCursor
+                    )
+                else:
+                    # Fallback to individual connection parameters (for local development)
                     self.connection = psycopg2.connect(
                         host=os.getenv('DB_HOST', 'localhost'),
                         user=os.getenv('DB_USER', 'postgres'),
