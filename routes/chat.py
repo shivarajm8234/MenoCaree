@@ -3,7 +3,7 @@ from flask_login import login_required
 import os
 import logging
 from groq import Groq
-from googletrans import Translator
+from deep_translator import GoogleTranslator
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
@@ -17,8 +17,6 @@ try:
 except Exception as e:
     logging.error("Failed to initialize Groq client in chat.py: %s", str(e))
     client = None
-
-# Initialize Google Translator
 translator = Translator()
 
 # Language codes for translation
@@ -55,8 +53,8 @@ def chat():
         
         # If message is not in English, translate it to English for the AI
         if target_lang != 'en':
-            translated_message = translator.translate(message, src=target_lang, dest='en')
-            message = translated_message.text
+            translator = GoogleTranslator(source=target_lang, target='en')
+            message = translator.translate(text=message)
 
         # Create chat completion with Groq
         chat_completion = client.chat.completions.create(
@@ -82,8 +80,8 @@ def chat():
 
         # If target language is not English, translate the response
         if target_lang != 'en':
-            translated_response = translator.translate(response, src='en', dest=target_lang)
-            response = translated_response.text
+            translator = GoogleTranslator(source='en', target=target_lang)
+            response = translator.translate(text=response)
 
         return jsonify({
             'response': response,
@@ -95,8 +93,8 @@ def chat():
         error_message = "Sorry, there was an error processing your message. Please try again."
         if target_lang != 'en':
             try:
-                translated_error = translator.translate(error_message, src='en', dest=target_lang)
-                error_message = translated_error.text
+                translator = GoogleTranslator(source='en', target=target_lang)
+                error_message = translator.translate(text=error_message)
             except:
                 pass  # If translation fails, use English error message
                 
