@@ -2,7 +2,15 @@ from flask import Blueprint, render_template, request, jsonify, send_file
 import os
 from groq import Groq
 from dotenv import load_dotenv
-import pdfkit
+
+# Try to import pdfkit but don't fail if it's not available
+try:
+    import pdfkit
+    PDFKIT_AVAILABLE = True
+except ImportError:
+    PDFKIT_AVAILABLE = False
+    import logging
+    logging.warning("pdfkit not available. PDF generation will be limited.")
 import io
 import uuid
 import logging
@@ -275,12 +283,49 @@ def generate_pdf_report(analysis_text, report_data):
             'header-spacing': '5'
         }
 
+        # Generate filename first
+        filename = f"MenoCare_Professional_Report_{current_date.strftime('%Y%m%d')}_{report_id}.pdf"
+        
         # Generate PDF
         try:
-            pdf = pdfkit.from_string(html_content, False, options=options)
-            filename = f"MenoCare_Professional_Report_{current_date.strftime('%Y%m%d')}_{report_id}.pdf"
-            logging.info("PDF report generated successfully")
-            return pdf, filename
+            if PDFKIT_AVAILABLE:
+                # Use pdfkit if available
+                pdf = pdfkit.from_string(html_content, False, options=options)
+                logging.info("PDF report generated successfully using pdfkit")
+                return pdf, filename
+            else:
+                # Fallback to using reportlab if pdfkit is not available
+                from reportlab.pdfgen import canvas
+                from reportlab.lib.pagesizes import letter
+                from io import BytesIO
+                
+                buffer = BytesIO()
+                c = canvas.Canvas(buffer, pagesize=letter)
+                c.drawString(100, 750, f"MenoCare Professional Health Report - {report_id}")
+                c.drawString(100, 735, f"Generated: {current_date.strftime('%Y-%m-%d %H:%M:%S')}")
+                c.drawString(100, 710, "")
+                
+                # Add patient info
+                c.drawString(100, 695, f"Patient ID: {patient_id}")
+                c.drawString(100, 680, f"Patient Name: {patient_name}")
+                
+                # Add a simple version of the analysis text
+                c.drawString(100, 650, "Professional Analysis:")
+                y_position = 635
+                for line in analysis_text.split('\n'):
+                    if line.strip():
+                        c.drawString(100, y_position, line[:80])  # Limit line length
+                        y_position -= 15
+                        if y_position < 50:  # Create a new page if we're at the bottom
+                            c.showPage()
+                            y_position = 750
+                
+                c.showPage()
+                c.save()
+                
+                pdf = buffer.getvalue()
+                logging.info("Simple PDF report generated using reportlab (fallback mode)")
+                return pdf, filename
         except Exception as pdf_error:
             logging.error("PDF generation error: %s", str(pdf_error))
             raise Exception("Failed to generate PDF report") from pdf_error
