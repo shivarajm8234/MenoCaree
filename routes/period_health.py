@@ -6,11 +6,32 @@ from dotenv import load_dotenv
 # Try to import pdfkit but don't fail if it's not available
 try:
     import pdfkit
-    PDFKIT_AVAILABLE = True
+    # Check if wkhtmltopdf is installed by checking the configuration
+    try:
+        path_to_wkhtmltopdf = pdfkit.configuration()
+        # Try to detect the wkhtmltopdf executable
+        if os.environ.get('KOYEB_APP_NAME') or os.environ.get('DEPLOYMENT_ENV') == 'production':
+            # We're in Koyeb or another deployment environment, force use of fallback
+            PDFKIT_AVAILABLE = False
+            import logging
+            logging.warning("Running in deployment environment, using reportlab for PDF generation.")
+        else:
+            # Test if we can actually use pdfkit by checking for wkhtmltopdf
+            test_wkhtmltopdf = os.popen('which wkhtmltopdf').read().strip()
+            if test_wkhtmltopdf:
+                PDFKIT_AVAILABLE = True
+            else:
+                PDFKIT_AVAILABLE = False
+                import logging
+                logging.warning("wkhtmltopdf executable not found. PDF generation will use fallback.")
+    except Exception:
+        PDFKIT_AVAILABLE = False
+        import logging
+        logging.warning("wkhtmltopdf configuration failed. PDF generation will use fallback.")
 except ImportError:
     PDFKIT_AVAILABLE = False
     import logging
-    logging.warning("pdfkit not available. PDF generation will be limited.")
+    logging.warning("pdfkit not available. PDF generation will use reportlab fallback.")
 import io
 import uuid
 import logging
