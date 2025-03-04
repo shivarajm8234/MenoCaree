@@ -265,10 +265,10 @@ def generate_pdf_report(analysis_text, report_data):
             'encoding': 'UTF-8',
             'no-outline': None,
             'enable-local-file-access': None,
-            'footer-right': '[page] of [topage]',
+            'footer-right': f'[page] of [topage]',
             'footer-font-size': '8',
             'header-font-size': '8',
-            'header-right': 'Report ID: ' + str(report_id),
+            'header-right': f'Report ID: {report_id}',
             'header-spacing': '5'
         }
 
