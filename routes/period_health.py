@@ -2,12 +2,7 @@ from flask import Blueprint, render_template, request, jsonify, send_file
 import os
 from groq import Groq
 from dotenv import load_dotenv
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
-from reportlab.lib import colors
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch
+import pdfkit
 import io
 import uuid
 import logging
@@ -19,140 +14,276 @@ logging.basicConfig(level=logging.DEBUG)
 
 period_health = Blueprint('period_health', __name__)
 
-# Initialize Groq client
-try:
-    groq_client = Groq(api_key=os.getenv('GROQ_API_KEY'))
-    logging.info("Groq client initialized successfully in period_health.py")
-except Exception as e:
-    logging.error("Failed to initialize Groq client in period_health.py: %s", str(e))
-    groq_client = None
-
 # Load environment variables
 load_dotenv()
 
-# Groq client initialization moved to top of file
+# Initialize Groq client
+groq_api_key = os.getenv('GROQ_API_KEY')
+logging.debug("GROQ_API_KEY found: %s", bool(groq_api_key))
+
+if not groq_api_key:
+    logging.error("GROQ_API_KEY environment variable is not set")
+    raise ValueError("GROQ_API_KEY environment variable is not set")
+
+try:
+    groq_client = Groq(
+        api_key=groq_api_key
+    )
+    logging.info("Groq client initialized successfully")
+except Exception as e:
+    logging.error("Failed to initialize Groq client: %s", str(e))
+    raise
 
 def generate_pdf_report(analysis_text, report_data):
     try:
         logging.info("Generating PDF report...")
         report_id = f"MC-{str(uuid.uuid4())[:8].upper()}"
-        filename = f"report_{report_id}.pdf"
         current_date = datetime.now()
         
         # Get patient information
         patient_id = report_data.get('patientId', 'Not provided')
         patient_name = report_data.get('patientName', 'Not provided')
-        age = report_data.get('age', 'Not provided')
-        last_period = report_data.get('lastPeriod', 'Not provided')
         
         # Format the symptoms and conditions
         symptoms = report_data.get('symptoms', [])
         medical_conditions = report_data.get('medicalConditions', [])
         
-        # Create PDF buffer
-        buffer = io.BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=letter)
-        story = []
-        
-        # Get styles
-        styles = getSampleStyleSheet()
-        title_style = ParagraphStyle(
-            'CustomTitle',
-            parent=styles['Heading1'],
-            fontSize=24,
-            spaceAfter=30,
-            textColor=colors.HexColor('#2c5282')
-        )
-        heading_style = ParagraphStyle(
-            'CustomHeading',
-            parent=styles['Heading2'],
-            fontSize=18,
-            spaceAfter=20,
-            textColor=colors.HexColor('#2c5282')
-        )
-        body_style = ParagraphStyle(
-            'CustomBody',
-            parent=styles['Normal'],
-            fontSize=12,
-            spaceAfter=12
-        )
-        
-        # Add title
-        story.append(Paragraph('Professional Health Assessment Report', title_style))
-        story.append(Spacer(1, 20))
-        
-        # Add report metadata
-        story.append(Paragraph(f'Report ID: {report_id}', body_style))
-        story.append(Paragraph(f'Generated on: {current_date.strftime("%Y-%m-%d %H:%M:%S")}', body_style))
-        story.append(Spacer(1, 20))
-        
-        # Add patient information
-        story.append(Paragraph('Patient Information', heading_style))
-        patient_data = [
-            ['Patient ID:', patient_id],
-            ['Patient Name:', patient_name],
-            ['Age:', age],
-            ['Last Menstrual Period:', last_period]
-        ]
-        patient_table = Table(patient_data, colWidths=[2*inch, 4*inch])
-        patient_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#f8fafc')),
-            ('TEXTCOLOR', (0, 0), (0, -1), colors.HexColor('#2c5282')),
-            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, -1), 10),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
-            ('BACKGROUND', (1, 0), (1, -1), colors.white),
-            ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#e2e8f0'))
-        ]))
-        story.append(patient_table)
-        story.append(Spacer(1, 20))
-        
-        # Add symptoms
-        if symptoms:
-            story.append(Paragraph('Reported Symptoms', heading_style))
-            for symptom in symptoms:
-                story.append(Paragraph(f'• {symptom}', body_style))
-            story.append(Spacer(1, 20))
-        
-        # Add medical conditions
-        if medical_conditions:
-            story.append(Paragraph('Medical Conditions', heading_style))
-            for condition in medical_conditions:
-                story.append(Paragraph(f'• {condition}', body_style))
-            story.append(Spacer(1, 20))
-        
-        # Add analysis
-        story.append(Paragraph('Health Analysis', heading_style))
-        story.append(Paragraph(analysis_text, body_style))
-        story.append(Spacer(1, 20))
-        
-        # Add disclaimer
-        disclaimer_style = ParagraphStyle(
-            'Disclaimer',
-            parent=styles['Normal'],
-            fontSize=8,
-            textColor=colors.HexColor('#c53030'),
-            backColor=colors.HexColor('#fff5f5'),
-            borderColor=colors.HexColor('#feb2b2'),
-            borderWidth=1,
-            borderPadding=10
-        )
-        story.append(Paragraph(
-            'DISCLAIMER: This report is generated based on the information provided and should not be considered as a substitute for professional medical advice. Please consult with healthcare professionals for medical decisions.',
-            disclaimer_style
-        ))
-        
-        # Build PDF
-        doc.build(story)
-        pdf = buffer.getvalue()
-        buffer.close()
-        
-        logging.info("PDF report generated successfully")
-        return pdf, filename
-        
+        # Create HTML content
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>MenoCare Professional Health Report</title>
+            <style>
+                body {{
+                    font-family: 'Arial', sans-serif;
+                    line-height: 1.6;
+                    color: #333;
+                    margin: 0;
+                    padding: 0;
+                }}
+                .container {{
+                    max-width: 1000px;
+                    margin: 0 auto;
+                    padding: 20px;
+                }}
+                .header {{
+                    background: linear-gradient(135deg, #2c5282 0%, #1a365d 100%);
+                    color: white;
+                    padding: 30px;
+                    border-radius: 10px 10px 0 0;
+                    margin-bottom: 30px;
+                }}
+                .patient-info {{
+                    background: rgba(255, 255, 255, 0.1);
+                    padding: 15px;
+                    border-radius: 5px;
+                    margin-top: 15px;
+                }}
+                .report-info {{
+                    background: #f8fafc;
+                    padding: 15px;
+                    border-radius: 5px;
+                    margin: 20px 0;
+                    border: 1px solid #e2e8f0;
+                }}
+                .section {{
+                    background: white;
+                    padding: 25px;
+                    margin: 20px 0;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                }}
+                h1 {{
+                    font-size: 28px;
+                    margin: 0;
+                    padding-bottom: 10px;
+                    border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+                }}
+                h2 {{
+                    color: #2c5282;
+                    font-size: 22px;
+                    margin-top: 0;
+                    padding-bottom: 10px;
+                    border-bottom: 2px solid #e2e8f0;
+                }}
+                .meta-info {{
+                    color: rgba(255, 255, 255, 0.9);
+                    margin-top: 10px;
+                    font-size: 14px;
+                }}
+                table {{
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin: 15px 0;
+                }}
+                th, td {{
+                    padding: 12px;
+                    text-align: left;
+                    border-bottom: 1px solid #e2e8f0;
+                }}
+                th {{
+                    background-color: #f8fafc;
+                    color: #2c5282;
+                    font-weight: 600;
+                }}
+                ul {{
+                    margin: 10px 0;
+                    padding-left: 20px;
+                }}
+                li {{
+                    margin: 8px 0;
+                    line-height: 1.5;
+                }}
+                .footer {{
+                    text-align: center;
+                    margin-top: 40px;
+                    padding-top: 20px;
+                    border-top: 2px solid #e2e8f0;
+                    color: #666;
+                    font-size: 14px;
+                }}
+                .disclaimer {{
+                    background: #fff5f5;
+                    border: 1px solid #feb2b2;
+                    padding: 15px;
+                    border-radius: 5px;
+                    margin: 20px 0;
+                    font-size: 14px;
+                    color: #c53030;
+                }}
+                .logo {{
+                    text-align: right;
+                    margin-bottom: 10px;
+                }}
+                .watermark {{
+                    position: fixed;
+                    bottom: 0;
+                    right: 0;
+                    opacity: 0.1;
+                    z-index: -1;
+                    font-size: 12px;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>Professional Health Assessment Report</h1>
+                    <div class="meta-info">
+                        <p>Report ID: {report_id}</p>
+                        <p>Generated on: {current_date.strftime('%B %d, %Y at %I:%M %p')}</p>
+                    </div>
+                    <div class="patient-info">
+                        <p><strong>Patient ID:</strong> {patient_id}</p>
+                        <p><strong>Patient Name:</strong> {patient_name}</p>
+                    </div>
+                </div>
+
+                <div class="report-info">
+                    <h2>Patient Information</h2>
+                    <table>
+                        <tr>
+                            <th>Category</th>
+                            <th>Details</th>
+                        </tr>
+                        <tr>
+                            <td>Age</td>
+                            <td>{report_data.get('age', 'Not provided')}</td>
+                        </tr>
+                        <tr>
+                            <td>Last Menstrual Period</td>
+                            <td>{report_data.get('lastPeriodDate', 'Not provided')}</td>
+                        </tr>
+                        <tr>
+                            <td>Cycle Length</td>
+                            <td>{report_data.get('cycleLength', 'Not provided')}</td>
+                        </tr>
+                        <tr>
+                            <td>Flow Intensity</td>
+                            <td>{report_data.get('flowIntensity', 'Not provided')}</td>
+                        </tr>
+                        <tr>
+                            <td>Cycle Regularity</td>
+                            <td>{report_data.get('cycleRegularity', 'Not provided')}</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="section">
+                    <h2>Reported Symptoms</h2>
+                    <table>
+                        <tr>
+                            <th>Symptom</th>
+                        </tr>
+                        {''.join(f'<tr><td>{symptom}</td></tr>' for symptom in symptoms) if symptoms else '<tr><td>No symptoms reported</td></tr>'}
+                    </table>
+                </div>
+
+                <div class="section">
+                    <h2>Medical History</h2>
+                    <table>
+                        <tr>
+                            <th>Condition</th>
+                        </tr>
+                        {''.join(f'<tr><td>{condition}</td></tr>' for condition in medical_conditions) if medical_conditions else '<tr><td>No medical conditions reported</td></tr>'}
+                    </table>
+                </div>
+
+                <div class="section">
+                    <h2>Professional Analysis</h2>
+                    {analysis_text.replace('\n', '<br>')}
+                </div>
+
+                <div class="disclaimer">
+                    <strong>Medical Disclaimer:</strong>
+                    <p>This report is generated based on the information provided and should be used for informational purposes only. It is not intended to be a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition.</p>
+                </div>
+
+                <div class="footer">
+                    <p>MenoCare Professional Health Report</p>
+                    <p>Report ID: {report_id} | Generated: {current_date.strftime('%Y-%m-%d %H:%M:%S')}</p>
+                    <p> {current_date.year} MenoCare. All rights reserved.</p>
+                </div>
+
+                <div class="watermark">
+                    MenoCare Report {report_id} | {current_date.strftime('%Y-%m-%d')}
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+
+        # Configure pdfkit options
+        options = {
+            'page-size': 'A4',
+            'margin-top': '0.75in',
+            'margin-right': '0.75in',
+            'margin-bottom': '0.75in',
+            'margin-left': '0.75in',
+            'encoding': 'UTF-8',
+            'no-outline': None,
+            'enable-local-file-access': None,
+            'footer-right': f'[page] of [topage]',
+            'footer-font-size': '8',
+            'header-font-size': '8',
+            'header-right': f'Report ID: {report_id}',
+            'header-spacing': '5'
+        }
+
+        # Generate PDF
+        try:
+            pdf = pdfkit.from_string(html_content, False, options=options)
+            filename = f"MenoCare_Professional_Report_{current_date.strftime('%Y%m%d')}_{report_id}.pdf"
+            logging.info("PDF report generated successfully")
+            return pdf, filename
+        except Exception as pdf_error:
+            logging.error("PDF generation error: %s", str(pdf_error))
+            raise Exception("Failed to generate PDF report") from pdf_error
+
     except Exception as e:
-        logging.error(f"Error in generate_pdf_report: {str(e)}")
+        logging.error("Error in generate_pdf_report: %s", str(e))
         raise
 
 @period_health.route('/health_report')
@@ -170,142 +301,11 @@ def health_report():
 def analyze_report():
     try:
         # Verify Groq client is initialized
-        if not groq_client:
-            logging.error("Groq client not initialized")
+        if not groq_api_key:
+            logging.error("GROQ_API_KEY not found")
             return jsonify({
                 'success': False,
-                'error': "Groq client not initialized. Please check your environment variables and logs."
-            }), 500
-
-        # Get JSON data
-        data = request.get_json()
-        if not data:
-            return jsonify({
-                'success': False,
-                'error': "No data provided"
-            }), 400
-
-        # Extract data fields
-        patient_id = data.get('patientId')
-        patient_name = data.get('patientName')
-        age = data.get('age')
-        last_period = data.get('lastPeriod')
-        symptoms = data.get('symptoms', [])
-        medical_conditions = data.get('medicalConditions', [])
-
-        # Prepare prompt for AI analysis
-        prompt = f'''Analyze the following menstrual health information and provide a professional assessment:
-
-Patient Information:
-- Age: {age}
-- Last Menstrual Period: {last_period}
-
-Reported Symptoms:
-{', '.join(symptoms) if symptoms else 'None reported'}
-
-Medical Conditions:
-{', '.join(medical_conditions) if medical_conditions else 'None reported'}
-
-Provide a comprehensive analysis including:
-1. Assessment of menstrual cycle regularity
-2. Evaluation of reported symptoms
-3. Potential correlations with medical conditions
-4. General health recommendations
-5. Any potential red flags that should be discussed with a healthcare provider
-
-Please format the response in clear paragraphs.'''
-
-        try:
-            # Get AI analysis
-            completion = groq_client.chat.completions.create(
-                model="mixtral-8x7b-32768",
-                messages=[{
-                    "role": "system",
-                    "content": "You are a professional healthcare analyst specializing in menstrual health. Provide clear, professional analysis while being mindful of medical ethics and the importance of consulting healthcare providers."
-                }, {
-                    "role": "user",
-                    "content": prompt
-                }],
-                temperature=0.5,
-                max_tokens=2048,
-                top_p=1,
-                stream=False
-            )
-            
-            analysis_text = completion.choices[0].message.content
-            
-            # Generate PDF report
-            report_data = {
-                'patientId': patient_id,
-                'patientName': patient_name,
-                'age': age,
-                'lastPeriod': last_period,
-                'symptoms': symptoms,
-                'medicalConditions': medical_conditions
-            }
-            
-            pdf_content, filename = generate_pdf_report(analysis_text, report_data)
-            
-            # Save PDF to temporary file
-            temp_dir = os.path.join(os.getcwd(), 'temp')
-            os.makedirs(temp_dir, exist_ok=True)
-            temp_path = os.path.join(temp_dir, filename)
-            
-            with open(temp_path, 'wb') as f:
-                f.write(pdf_content)
-            
-            return jsonify({
-                'success': True,
-                'analysis': analysis_text,
-                'filename': filename
-            })
-            
-        except Exception as ai_error:
-            logging.error("AI analysis error: %s", str(ai_error))
-            return jsonify({
-                'success': False,
-                'error': "Failed to generate AI analysis"
-            }), 500
-            
-    except Exception as e:
-        logging.error("Error in analyze_report: %s", str(e))
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    try:
-        # Verify Groq client is initialized
-        if not groq_client:
-            logging.error("Groq client not initialized")
-            return jsonify({
-                'success': False,
-                'error': "Groq client not initialized. Please check your environment variables and logs."
+                'error': "API key not configured. Please check your environment variables."
             }), 500
 
         # Get JSON data
@@ -502,11 +502,11 @@ def download_report_get(filename):
 def analyze_symptoms():
     try:
         # Verify Groq client is initialized
-        if not groq_client:
-            logging.error("Groq client not initialized")
+        if not groq_api_key:
+            logging.error("GROQ_API_KEY not found")
             return jsonify({
                 'success': False,
-                'error': "Groq client not initialized. Please check your environment variables and logs."
+                'error': "API key not configured. Please check your environment variables."
             }), 500
 
         data = request.json
