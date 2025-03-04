@@ -48,6 +48,9 @@ def generate_pdf_report(analysis_text, report_data):
         symptoms = report_data.get('symptoms', [])
         medical_conditions = report_data.get('medicalConditions', [])
         
+        # Preprocess analysis text to handle newlines
+        formatted_analysis = analysis_text.replace('\n', '<br>')
+        
         # Create HTML content
         html_content = f"""
         <!DOCTYPE html>
@@ -233,7 +236,7 @@ def generate_pdf_report(analysis_text, report_data):
 
                 <div class="section">
                     <h2>Professional Analysis</h2>
-                    {analysis_text.replace('\n', '<br>')}
+                    {formatted_analysis}
                 </div>
 
                 <div class="disclaimer">
