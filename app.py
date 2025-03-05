@@ -2705,8 +2705,19 @@ def menopause_track():
         
         print(f"Received data - Age: {age}, Last Period: {last_period}, Symptoms: {symptoms}")  # Debug log
         
-        if not all([age, last_period, symptoms]):
+        # Validate required fields
+        if not all([age, last_period is not None, symptoms]):
             flash('Please provide all required information', 'error')
+            return redirect(url_for('menopause'))
+            
+        # Validate age range
+        if age < 35 or age > 65:
+            flash('Age must be between 35 and 65 years', 'error')
+            return redirect(url_for('menopause'))
+            
+        # Validate months since last period
+        if last_period < 0 or last_period > 120:
+            flash('Months since last period must be between 0 and 120', 'error')
             return redirect(url_for('menopause'))
         
         # Prepare Groq prompt

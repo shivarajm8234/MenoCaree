@@ -59,12 +59,13 @@
                             <div class="space-y-2">
                                 <label for="last_period" class="block text-sm font-medium text-gray-700">Months Since Last Period</label>
                                 <div class="relative">
-                                    <input type="number" id="last_period" name="last_period" required min="0"
+                                    <input type="number" id="last_period" name="last_period" required min="0" max="120"
                                            class="mt-1 block w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent">
                                     <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                                         <span class="text-gray-500">months</span>
                                     </div>
                                 </div>
+                                <p class="text-xs text-gray-500 mt-1">Enter a value between 0 and 120 months (10 years)</p>
                             </div>
                         </div>
                     </div>
@@ -112,6 +113,14 @@
                                 <input type="checkbox" id="other_symptoms" name="symptoms" value="Other Symptoms" class="h-4 w-4 text-purple-500">
                                 <label for="other_symptoms" class="ml-2 text-gray-700">Other Symptoms</label>
                             </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Validation Error Messages -->
+                    <div id="validation-errors" class="hidden bg-red-50 text-red-700 p-4 rounded-lg mb-6">
+                        <div class="flex items-center">
+                            <i class="fas fa-exclamation-circle mr-2"></i>
+                            <div id="error-message">Please correct the errors before submitting.</div>
                         </div>
                     </div>
                     
@@ -168,6 +177,92 @@
                 parentDiv.classList.remove('border-purple-500', 'bg-purple-50');
             }
         });
+    });
+    
+    // Form validation
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        const lastPeriodInput = document.getElementById('last_period');
+        const ageInput = document.getElementById('age');
+        
+        // Add input event listener for real-time validation
+        lastPeriodInput.addEventListener('input', function() {
+            validateLastPeriod();
+        });
+        
+        // Form submission validation
+        form.addEventListener('submit', function(e) {
+            // Validate before submission
+            if (!validateLastPeriod() || !validateSymptoms()) {
+                e.preventDefault();
+            }
+        });
+        
+        // Validate months since last period
+        function validateLastPeriod() {
+            const value = parseInt(lastPeriodInput.value);
+            
+            if (isNaN(value)) {
+                showValidationError(lastPeriodInput, 'Please enter a valid number');
+                return false;
+            }
+            
+            if (value < 0) {
+                showValidationError(lastPeriodInput, 'Value cannot be negative');
+                return false;
+            }
+            
+            if (value > 120) {
+                showValidationError(lastPeriodInput, 'Value cannot exceed 120 months (10 years)');
+                return false;
+            }
+            
+            // Clear any previous error styling
+            clearValidationError(lastPeriodInput);
+            return true;
+        }
+        
+        // Validate that at least one symptom is selected
+        function validateSymptoms() {
+            const selectedSymptoms = document.querySelectorAll('input[name="symptoms"]:checked');
+            
+            if (selectedSymptoms.length === 0) {
+                alert('Please select at least one symptom');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        // Show validation error
+        function showValidationError(inputElement, message) {
+            // Remove any existing error message
+            clearValidationError(inputElement);
+            
+            // Add error styling
+            inputElement.classList.add('border-red-500');
+            
+            // Create and append error message
+            const errorMessage = document.createElement('div');
+            errorMessage.className = 'text-red-500 text-xs mt-1';
+            errorMessage.textContent = message;
+            errorMessage.id = inputElement.id + '-error';
+            
+            // Insert after the input's parent div (which includes the label)
+            inputElement.closest('.relative').after(errorMessage);
+        }
+        
+        // Clear validation error
+        function clearValidationError(inputElement) {
+            // Remove error styling
+            inputElement.classList.remove('border-red-500');
+            
+            // Remove any existing error message
+            const existingError = document.getElementById(inputElement.id + '-error');
+            if (existingError) {
+                existingError.remove();
+            }
+        }
     });
 </script>
 {% endblock %}
