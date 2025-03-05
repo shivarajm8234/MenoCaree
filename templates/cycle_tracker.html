@@ -149,15 +149,20 @@
                     <form id="logCycleForm" class="space-y-6">
                         <div class="input-group">
                             <label for="dob">Date of Birth</label>
-                            <input type="date" id="dob" name="dob" required>
+                            <input type="date" id="dob" name="dob" required min="1985-01-01" max="{{ current_local_time.strftime('%Y-%m-%d') }}">
+                            <div id="dob-error" class="text-red-500 text-sm mt-1 hidden"></div>
+                            <div class="text-gray-500 text-xs mt-1">Must be from 1985 and cannot be in the future</div>
                         </div>
                         <div class="input-group">
                             <label for="last_period">Last Period Start Date</label>
-                            <input type="date" id="last_period" name="last_period" required>
+                            <input type="date" id="last_period" name="last_period" required max="{{ current_local_time.strftime('%Y-%m-%d') }}">
+                            <div id="last-period-error" class="text-red-500 text-sm mt-1 hidden"></div>
                         </div>
                         <div class="input-group">
                             <label for="cycle_length">Average Cycle Length (days)</label>
-                            <input type="number" id="cycle_length" name="cycle_length" min="20" max="45" required>
+                            <input type="number" id="cycle_length" name="cycle_length" min="21" max="35" value="28" required>
+                            <div id="cycle-length-error" class="text-red-500 text-sm mt-1 hidden"></div>
+                            <div class="text-gray-500 text-xs mt-1">Most menstrual cycles range from 21 to 35 days</div>
                         </div>
                         <div class="input-group">
                             <label for="health_issues">Health Issues (optional)</label>
@@ -342,8 +347,140 @@ async function loadCycleData() {
 }
 
 // Event listeners
+// Validate date of birth
+document.getElementById('dob').addEventListener('change', function() {
+    validateDateOfBirth();
+});
+
+// Validate last period date
+document.getElementById('last_period').addEventListener('change', function() {
+    validateLastPeriodDate();
+});
+
+// Validate cycle length
+document.getElementById('cycle_length').addEventListener('input', function() {
+    validateCycleLength();
+});
+
+// Validate date of birth
+function validateDateOfBirth() {
+    const dobInput = document.getElementById('dob');
+    const dobError = document.getElementById('dob-error');
+    const dob = new Date(dobInput.value);
+    const today = new Date();
+    const minYear = 1985;
+    
+    // Clear previous error
+    dobError.textContent = '';
+    dobError.classList.add('hidden');
+    
+    // Check if date is valid
+    if (isNaN(dob.getTime())) {
+        dobError.textContent = 'Please enter a valid date';
+        dobError.classList.remove('hidden');
+        return false;
+    }
+    
+    // Check if date is in the future
+    if (dob > today) {
+        dobError.textContent = 'Date of birth cannot be in the future';
+        dobError.classList.remove('hidden');
+        return false;
+    }
+    
+    // Check if date is before 1985
+    if (dob.getFullYear() < minYear) {
+        dobError.textContent = `Date of birth must be from ${minYear} onwards`;
+        dobError.classList.remove('hidden');
+        return false;
+    }
+    
+    return true;
+}
+
+// Validate last period date
+function validateLastPeriodDate() {
+    const lastPeriodInput = document.getElementById('last_period');
+    const lastPeriodError = document.getElementById('last-period-error');
+    const lastPeriod = new Date(lastPeriodInput.value);
+    const today = new Date();
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(today.getMonth() - 6);
+    
+    // Clear previous error
+    lastPeriodError.textContent = '';
+    lastPeriodError.classList.add('hidden');
+    
+    // Check if date is valid
+    if (isNaN(lastPeriod.getTime())) {
+        lastPeriodError.textContent = 'Please enter a valid date';
+        lastPeriodError.classList.remove('hidden');
+        return false;
+    }
+    
+    // Check if date is in the future
+    if (lastPeriod > today) {
+        lastPeriodError.textContent = 'Last period date cannot be in the future';
+        lastPeriodError.classList.remove('hidden');
+        return false;
+    }
+    
+    // Warning if period is more than 6 months ago
+    if (lastPeriod < sixMonthsAgo) {
+        lastPeriodError.textContent = 'Warning: Last period is more than 6 months ago';
+        lastPeriodError.classList.remove('hidden');
+        // Still valid, just a warning
+    }
+    
+    return true;
+}
+
+// Validate cycle length
+function validateCycleLength() {
+    const cycleLengthInput = document.getElementById('cycle_length');
+    const cycleLengthError = document.getElementById('cycle-length-error');
+    const cycleLength = parseInt(cycleLengthInput.value);
+    
+    // Clear previous error
+    cycleLengthError.textContent = '';
+    cycleLengthError.classList.add('hidden');
+    
+    // Check if value is a number
+    if (isNaN(cycleLength)) {
+        cycleLengthError.textContent = 'Please enter a valid number';
+        cycleLengthError.classList.remove('hidden');
+        return false;
+    }
+    
+    // Check if value is within normal range
+    if (cycleLength < 21) {
+        cycleLengthError.textContent = 'Cycle length should be at least 21 days';
+        cycleLengthError.classList.remove('hidden');
+        return false;
+    }
+    
+    if (cycleLength > 35) {
+        cycleLengthError.textContent = 'Cycle length should be at most 35 days';
+        cycleLengthError.classList.remove('hidden');
+        return false;
+    }
+    
+    return true;
+}
+
+// Form submission with validation
 document.getElementById('logCycleForm').addEventListener('submit', async (e) => {
     e.preventDefault();
+    
+    // Validate all fields
+    const isDobValid = validateDateOfBirth();
+    const isLastPeriodValid = validateLastPeriodDate();
+    const isCycleLengthValid = validateCycleLength();
+    
+    // If any validation fails, don't submit
+    if (!isDobValid || !isLastPeriodValid || !isCycleLengthValid) {
+        return;
+    }
     
     try {
         const formData = new FormData(e.target);

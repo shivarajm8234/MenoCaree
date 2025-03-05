@@ -1711,11 +1711,44 @@ def log_cycle_data():
         data = request.form
         dob = data.get('dob')
         last_period = data.get('last_period')
-        cycle_length = int(data.get('cycle_length', 28))
+        try:
+            cycle_length = int(data.get('cycle_length', 28))
+        except ValueError:
+            return jsonify({'error': 'Cycle length must be a valid number'}), 400
         health_issues = data.get('health_issues', '')
 
+        # Validate required fields
         if not dob or not last_period:
             return jsonify({'error': 'Date of birth and last period date are required'}), 400
+
+        # Validate date of birth
+        try:
+            dob_date = datetime.strptime(dob, '%Y-%m-%d')
+            today = datetime.now()
+            min_year = 1985
+            
+            if dob_date > today:
+                return jsonify({'error': 'Date of birth cannot be in the future'}), 400
+                
+            if dob_date.year < min_year:
+                return jsonify({'error': f'Date of birth must be from {min_year} onwards'}), 400
+        except ValueError:
+            return jsonify({'error': 'Invalid date of birth format'}), 400
+
+        # Validate last period date
+        try:
+            last_period_date = datetime.strptime(last_period, '%Y-%m-%d')
+            today = datetime.now()
+            six_months_ago = today - timedelta(days=180)  # Approximately 6 months
+            
+            if last_period_date > today:
+                return jsonify({'error': 'Last period date cannot be in the future'}), 400
+        except ValueError:
+            return jsonify({'error': 'Invalid last period date format'}), 400
+
+        # Validate cycle length
+        if cycle_length < 21 or cycle_length > 35:
+            return jsonify({'error': 'Cycle length should be between 21 and 35 days'}), 400
 
         # Calculate predictions
         predictions = predict_cycles(last_period, cycle_length)
@@ -2438,7 +2471,8 @@ with app.app_context():
 @login_required
 def cycle_tracker():
     try:
-        return render_template('cycle_tracker.html')
+        current_local_time = datetime.now()
+        return render_template('cycle_tracker.html', current_local_time=current_local_time, timedelta=timedelta)
     except Exception as e:
         print(f"Error in cycle_tracker: {str(e)}")
         return "An error occurred", 500
