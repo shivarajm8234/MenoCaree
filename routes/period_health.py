@@ -317,32 +317,198 @@ def generate_pdf_report(analysis_text, report_data):
             else:
                 # Fallback to using reportlab if pdfkit is not available
                 from reportlab.pdfgen import canvas
-                from reportlab.lib.pagesizes import letter
+                from reportlab.lib.pagesizes import letter, A4
+                from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+                from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
+                from reportlab.lib import colors
+                from reportlab.lib.units import inch
+                from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
                 from io import BytesIO
                 
                 buffer = BytesIO()
-                c = canvas.Canvas(buffer, pagesize=letter)
-                c.drawString(100, 750, f"MenoCare Professional Health Report - {report_id}")
-                c.drawString(100, 735, f"Generated: {current_date.strftime('%Y-%m-%d %H:%M:%S')}")
-                c.drawString(100, 710, "")
                 
-                # Add patient info
-                c.drawString(100, 695, f"Patient ID: {patient_id}")
-                c.drawString(100, 680, f"Patient Name: {patient_name}")
+                # Create a document with professional margins
+                doc = SimpleDocTemplate(
+                    buffer, 
+                    pagesize=A4,
+                    leftMargin=0.75*inch,
+                    rightMargin=0.75*inch,
+                    topMargin=0.75*inch,
+                    bottomMargin=0.75*inch
+                )
                 
-                # Add a simple version of the analysis text
-                c.drawString(100, 650, "Professional Analysis:")
-                y_position = 635
+                # Create styles
+                styles = getSampleStyleSheet()
+                
+                # Custom styles
+                title_style = ParagraphStyle(
+                    'Title',
+                    parent=styles['Title'],
+                    fontSize=18,
+                    textColor=colors.HexColor('#8a2be2'),
+                    spaceAfter=16,
+                    alignment=TA_CENTER
+                )
+                
+                subtitle_style = ParagraphStyle(
+                    'Subtitle',
+                    parent=styles['Heading2'],
+                    fontSize=14,
+                    textColor=colors.HexColor('#ff69b4'),
+                    spaceAfter=10
+                )
+                
+                header_style = ParagraphStyle(
+                    'Header',
+                    parent=styles['Heading3'],
+                    fontSize=12,
+                    textColor=colors.HexColor('#333333'),
+                    spaceAfter=6
+                )
+                
+                normal_style = ParagraphStyle(
+                    'Normal',
+                    parent=styles['Normal'],
+                    fontSize=10,
+                    leading=14,
+                    spaceAfter=10
+                )
+                
+                info_style = ParagraphStyle(
+                    'Info',
+                    parent=styles['Normal'],
+                    fontSize=9,
+                    textColor=colors.HexColor('#666666'),
+                    spaceAfter=6
+                )
+                
+                # Start building the document
+                elements = []
+                
+                # Title
+                elements.append(Paragraph(f"MenoCaree Professional Health Report", title_style))
+                elements.append(Paragraph(f"Report ID: {report_id}", info_style))
+                elements.append(Paragraph(f"Generated on: {current_date.strftime('%B %d, %Y at %I:%M %p')}", info_style))
+                elements.append(Spacer(1, 0.2*inch))
+                
+                # Patient Information Section
+                elements.append(Paragraph("Patient Information", subtitle_style))
+                
+                # Patient info table
+                patient_data = [
+                    ["Patient ID:", patient_id],
+                    ["Patient Name:", patient_name],
+                    ["Age:", report_data.get('age', 'Not provided')],
+                    ["Last Menstrual Period:", report_data.get('lastPeriodDate', 'Not provided')],
+                    ["Cycle Length:", report_data.get('cycleLength', 'Not provided')],
+                    ["Flow Intensity:", report_data.get('flowIntensity', 'Not provided')],
+                    ["Cycle Regularity:", report_data.get('cycleRegularity', 'Not provided')]
+                ]
+                
+                patient_table = Table(patient_data, colWidths=[2*inch, 3.5*inch])
+                patient_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#f8f9fa')),
+                    ('TEXTCOLOR', (0, 0), (0, -1), colors.HexColor('#333333')),
+                    ('ALIGN', (0, 0), (0, -1), 'LEFT'),
+                    ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (0, -1), 9),
+                    ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+                    ('BACKGROUND', (1, 0), (1, -1), colors.white),
+                    ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#dddddd')),
+                ]))
+                
+                elements.append(patient_table)
+                elements.append(Spacer(1, 0.2*inch))
+                
+                # Symptoms Section
+                elements.append(Paragraph("Reported Symptoms", subtitle_style))
+                
+                symptoms = report_data.get('symptoms', [])
+                if symptoms:
+                    symptom_data = [["Symptom"]]
+                    for symptom in symptoms:
+                        symptom_data.append([symptom])
+                    
+                    symptom_table = Table(symptom_data, colWidths=[5.5*inch])
+                    symptom_table.setStyle(TableStyle([
+                        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#f8f9fa')),
+                        ('TEXTCOLOR', (0, 0), (-1, 0), colors.HexColor('#333333')),
+                        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                        ('FONTSIZE', (0, 0), (-1, 0), 9),
+                        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+                        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#dddddd')),
+                    ]))
+                    elements.append(symptom_table)
+                else:
+                    elements.append(Paragraph("No symptoms reported", normal_style))
+                
+                elements.append(Spacer(1, 0.2*inch))
+                
+                # Medical Conditions Section
+                elements.append(Paragraph("Medical History", subtitle_style))
+                
+                medical_conditions = report_data.get('medicalConditions', [])
+                if medical_conditions:
+                    conditions_data = [["Condition"]]
+                    for condition in medical_conditions:
+                        conditions_data.append([condition])
+                    
+                    conditions_table = Table(conditions_data, colWidths=[5.5*inch])
+                    conditions_table.setStyle(TableStyle([
+                        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#f8f9fa')),
+                        ('TEXTCOLOR', (0, 0), (-1, 0), colors.HexColor('#333333')),
+                        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                        ('FONTSIZE', (0, 0), (-1, 0), 9),
+                        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+                        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#dddddd')),
+                    ]))
+                    elements.append(conditions_table)
+                else:
+                    elements.append(Paragraph("No medical conditions reported", normal_style))
+                
+                elements.append(Spacer(1, 0.2*inch))
+                
+                # Analysis Section
+                elements.append(Paragraph("Professional Analysis", subtitle_style))
+                
+                # Process analysis text into paragraphs
                 for line in analysis_text.split('\n'):
                     if line.strip():
-                        c.drawString(100, y_position, line[:80])  # Limit line length
-                        y_position -= 15
-                        if y_position < 50:  # Create a new page if we're at the bottom
-                            c.showPage()
-                            y_position = 750
+                        elements.append(Paragraph(line, normal_style))
                 
-                c.showPage()
-                c.save()
+                # Disclaimer
+                elements.append(Spacer(1, 0.3*inch))
+                disclaimer_style = ParagraphStyle(
+                    'Disclaimer',
+                    parent=styles['Normal'],
+                    fontSize=8,
+                    textColor=colors.HexColor('#c53030'),
+                    borderColor=colors.HexColor('#feb2b2'),
+                    borderWidth=1,
+                    borderPadding=10,
+                    backColor=colors.HexColor('#fff5f5'),
+                    alignment=TA_JUSTIFY
+                )
+                
+                disclaimer_text = """<strong>Medical Disclaimer:</strong> This report is generated based on the information provided and should be used for informational purposes only. It is not intended to be a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition."""
+                elements.append(Paragraph(disclaimer_text, disclaimer_style))
+                
+                # Footer
+                elements.append(Spacer(1, 0.3*inch))
+                footer_style = ParagraphStyle(
+                    'Footer',
+                    parent=styles['Normal'],
+                    fontSize=8,
+                    textColor=colors.HexColor('#666666'),
+                    alignment=TA_CENTER
+                )
+                elements.append(Paragraph(f"MenoCaree Professional Health Report | Report ID: {report_id}", footer_style))
+                elements.append(Paragraph(f"Generated: {current_date.strftime('%Y-%m-%d %H:%M:%S')} | © {current_date.year} MenoCaree. All rights reserved.", footer_style))
+                
+                # Build the document
+                doc.build(elements)
                 
                 pdf = buffer.getvalue()
                 logging.info("Simple PDF report generated using reportlab (fallback mode)")
