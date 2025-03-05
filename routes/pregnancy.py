@@ -28,6 +28,23 @@ def track_pregnancy():
         flash('Please provide both weeks pregnant and due date.', 'error')
         return redirect(url_for('pregnancy.index'))
     
+    # Simple validation for weeks pregnant
+    if weeks_pregnant < 1 or weeks_pregnant > 42:
+        flash('Weeks pregnant must be between 1 and 42.', 'error')
+        return redirect(url_for('pregnancy.index'))
+    
+    # Simple validation for due date
+    try:
+        due_date_obj = datetime.strptime(due_date, '%Y-%m-%d')
+        today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        
+        if due_date_obj < today:
+            flash('Due date must be in the future.', 'error')
+            return redirect(url_for('pregnancy.index'))
+    except ValueError:
+        flash('Invalid date format.', 'error')
+        return redirect(url_for('pregnancy.index'))
+    
     # Store in session
     session['pregnancy_details'] = {
         'weeks_pregnant': weeks_pregnant,

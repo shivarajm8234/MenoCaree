@@ -54,12 +54,14 @@
                                         <span class="text-gray-500">weeks</span>
                                     </div>
                                 </div>
+                                <p class="text-xs text-gray-500 mt-1">Enter a value between 1 and 42 weeks</p>
                             </div>
 
                             <div class="space-y-2">
                                 <label for="due_date" class="block text-sm font-medium text-gray-700">Your Due Date</label>
                                 <input type="date" id="due_date" name="due_date" required 
                                        class="mt-1 block w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                                <p class="text-xs text-gray-500 mt-1">Must be in the future</p>
                             </div>
                         </div>
                     </div>
@@ -104,4 +106,51 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const weeksInput = document.getElementById('weeks_pregnant');
+        const dueDateInput = document.getElementById('due_date');
+        const form = document.querySelector('form');
+        
+        // Set minimum date to today
+        const today = new Date();
+        const formattedToday = today.toISOString().split('T')[0];
+        dueDateInput.min = formattedToday;
+        
+        // Calculate due date when weeks change
+        weeksInput.addEventListener('change', function() {
+            const weeks = parseInt(weeksInput.value);
+            if (weeks >= 1 && weeks <= 42) {
+                const currentDate = new Date();
+                const remainingWeeks = 40 - weeks;
+                const dueDate = new Date(currentDate);
+                dueDate.setDate(currentDate.getDate() + (remainingWeeks * 7));
+                dueDateInput.value = dueDate.toISOString().split('T')[0];
+            }
+        });
+        
+        // Simple form validation
+        form.addEventListener('submit', function(event) {
+            const weeks = parseInt(weeksInput.value);
+            const dueDate = new Date(dueDateInput.value);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            // Check weeks range
+            if (isNaN(weeks) || weeks < 1 || weeks > 42) {
+                alert('Weeks pregnant must be between 1 and 42.');
+                event.preventDefault();
+                return;
+            }
+            
+            // Check due date is in future
+            if (dueDate < today) {
+                alert('Due date must be in the future.');
+                event.preventDefault();
+                return;
+            }
+        });
+    });
+</script>
 {% endblock %}
